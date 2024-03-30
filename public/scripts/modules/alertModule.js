@@ -65,7 +65,10 @@ export default (alertMsg, alertColor, alertLength) => {
     // Update timer every 1 milliseconds
     const interval = setInterval(() => {
         timer -= 1; // Decrease timer
-        alertProgressBar.style.height = `${timer / alertLength}%`;
+        const previousHeight = parseInt(alertProgressBar.style.height, 10);
+        if (previousHeight != Math.round(timer / alertLength)){
+            alertProgressBar.style.height = `${Math.round(timer / alertLength)}%`;
+        }
         if (timer <= 0) {
             alertDiv.remove();
             clearInterval(interval);

@@ -33,21 +33,20 @@ const login = () => {
         };
         sendPOST(route, credentials, (error, response) => {
             if (error) {
-                console.log(`Logging in with account with username '${credentials.username}' failed!`);
+                newAlert(`Login failed with error ${error}`, '#FF0000', 5);
                 console.error(error);
             } else {
-                /** @todo Ensure json property names are implemented correctly!*/ 
                 if (response.loginSuccess) {
-                    console.log(`Logging in with username '${credentials.username}' was successful!`);
+                    newAlert(`Logging in with username '${credentials.username}' was successful!`, '#00FF02', 1);
                     localStorage.setItem("username", credentials.username);
                     sendToApp();
                 } else {
-                    console.log(`Logging in with username '${credentials.username}' failed!`);
+                    newAlert(`Logging in with username '${credentials.username}' failed!`, '#FF8A00', 4);
                 }
             }
         });
     } else {
-        console.log("Credentials Invalid!")
+        newAlert("Credentials Invalid!", '#FF8A00', 4);
     }
 }
 
