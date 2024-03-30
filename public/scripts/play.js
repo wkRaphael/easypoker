@@ -23,7 +23,7 @@ ws.onclose = () => {
 };
 
 function setCardColor(element, cardValue) {
-  if (cardValue.includes("♥️") || cardValue.includes("♦")) {
+  if (cardValue.includes("♥") || cardValue.includes("♦")) {
     element.style.color = "red";
   } else {
     element.style.color = "black";

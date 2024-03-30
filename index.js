@@ -6,7 +6,7 @@ const http = require("http");
 const WebSocket = require("ws");
 const url = require("url");
 require("dotenv").config();
-
+const poker = require("./modules/poker");
 const mariadb = require('mariadb');
 const pool = mariadb.createPool(
     {
@@ -58,40 +58,9 @@ const wss = new WebSocket.Server({ server });
 
 const port = 3000;
 
-const numbers = [
-  "A",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "J",
-  "Q",
-  "K",
-];
-const suites = ["♣", "♠️", "♦", "♥️"];
-const cards = [];
 
-for (const suite of suites) {
-    for (const number of numbers) {
-        cards.push(`${number}${suite}`);
-    }
-}
 
-function shuffleArray(array) {
-    const shuffledArray = [...array];
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-    }
-    return shuffledArray;
-}
-
-let shuffledCards = shuffleArray(cards);
+let shuffledCards = poker.shuffledDeck();
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')))
@@ -108,7 +77,6 @@ app.get("/play", (req, res) => {
     const userId = generateUserId();
     res.render("play", { token: token, userId: userId });
 });
-
 app.get("/login", (req, res) => {
     res.render("login");
 });
@@ -116,7 +84,10 @@ app.get("/login", (req, res) => {
 app.get("/sign-up", (req, res) => {
     res.render("sign-up");
 });
-
+//This needs to stay the last page
+app.get('*', function(req, res){
+    res.status(404).render("404");
+});
 // Handle Post Requests
 
 loginUser = async (username, password) => {
@@ -251,12 +222,11 @@ wss.on("connection", (ws, req) => {
     connectedClients.set(ws, userId);
 
     console.log(`WebSocket connected - User ID: ${userId}`);
-
     ws.send(JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
 
      ws.on("message", (message) => {
         if (message.toString() === "shuffle") {
-        shuffledCards = shuffleArray(cards);
+            shuffledCards = poker.shuffledDeck()
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
             client.send(
