@@ -234,6 +234,7 @@ app.post("/logout", async (req, res) => {
 
 wss.on("connection", (ws, req) => {
     const parsedUrl = url.parse(req.url, true);
+    // Get the clients cookies with 'req.headers.cookie'
     const token = parsedUrl.query.token;
     const userId = parsedUrl.query.userId;
 

@@ -1,4 +1,6 @@
-sendPOST = (route, dataToSend, callback) => {
+import newAlert from './modules/alertModule.js';
+
+const sendPOST = (route, dataToSend, callback) => {
     const options = {
         method: "POST",
         body: JSON.stringify(dataToSend),
@@ -13,11 +15,11 @@ sendPOST = (route, dataToSend, callback) => {
     
 }
 
-sendToApp = () => {
+const sendToApp = () => {
     window.location.href = "/play";
 }
 
-login = () => {
+const login = () => {
     const username = document.getElementById("UsernameInput").value;
     const password = document.getElementById("PasswordInput").value;
     // Validate input
@@ -48,3 +50,8 @@ login = () => {
         console.log("Credentials Invalid!")
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const loginButton = document.querySelector('.Submit');
+    loginButton.addEventListener('click', login);
+});
