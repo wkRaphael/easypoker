@@ -60,3 +60,6 @@ a{
     color: #FFFFFF;
     font-size: max(2vh, 20px);
 }
+.Submit{
+    cursor: pointer;
+}
