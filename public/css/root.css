@@ -1,0 +1,33 @@
+body {
+    /* background-color: #f2f2f2; */
+    background-color: #212121;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+.WelcomeMessage{
+    margin: 0;
+    color: #10A5FF;
+}
+.Text{
+    margin-top: 10px;
+    margin-bottom: 0;
+    color: #FFFFFF;
+    size: 12px;
+}
+.Button{
+    margin-top: 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #10A5FF;
+}
+.Button:hover {
+    color: #707070;
+}
+.LineSeperator{
+    margin: 0;
+}

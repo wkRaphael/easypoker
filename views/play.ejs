@@ -1,9 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="styles.css" />
+    <title>Easy Poker</title>
+    <link rel="stylesheet" type="text/css" href="/css/play.css" />
   </head>
   <body>
+    <div class="container">
+      <div class="values">
+        <p>&#x2764;</p>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
+      </div>
+    </div>
     <div class="container">
       <div class="values">
         <p id="card1">??</p>
@@ -18,7 +28,11 @@
       <div class="buttons">
         <button class="redbutton" onclick="shuffle()">Shuffle</button>
       </div>
-      <script src="scripts.js"></script>
+      <script>
+        const token = "<%= token %>";
+        const userId = "<%= userId %>";
+      </script>
+      <script src="/scripts/play.js"></script>
     </div>
   </body>
 </html>

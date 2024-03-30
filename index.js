@@ -1,3 +1,4 @@
+const path = require('node:path'); 
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
@@ -67,18 +68,18 @@ function shuffleArray(array) {
 let shuffledCards = shuffleArray(cards);
 
 app.get("/", function (req, res) {
+  const userId = generateUserId();
+  res.render("root", { userId: userId });
+});
+
+app.get("/play", function (req, res) {
   const token = generateToken();
   const userId = generateUserId();
-  res.render("index.ejs", { token: token, userId: userId });
+  res.render("play", { token: token, userId: userId });
 });
 
-app.get("/styles.css", function (req, res) {
-  res.sendFile(__dirname + "/" + "styles.css");
-});
-
-app.get("/scripts.js", function (req, res) {
-  res.sendFile(__dirname + "/" + "scripts.js");
-});
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')))
 
 wss.on("connection", (ws, req) => {
   const parsedUrl = url.parse(req.url, true);
