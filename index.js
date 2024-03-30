@@ -174,8 +174,6 @@ createNewUser = async (username, email, password) => {
         wasCreated: wasAccountCreated
     }
     try{
-        // Only create a new user if the username isn't taken
-        console.log(await pool.query('SELECT * FROM users WHERE username = ?', username))
         if ((await pool.query('SELECT * FROM users WHERE username = ?', username)).length == 0){
             console.log(`Creating new user with username: ${username}`);
             const saltRounds = 10;
@@ -186,7 +184,8 @@ createNewUser = async (username, email, password) => {
             newUserObject.accessToken = accessToken;
         }
         else{
-            console.log("User already exists!");
+            newUserObject.error = "Username already taken!";
+            console.log("Account Creation Cancelled: User already exists");
         }
     } catch (err){
         console.error(err);
@@ -202,6 +201,10 @@ app.post("/sign-up", async (req, res) => {
         password.length >= 12, password.length <= 40, username.length <= 20, /^[a-zA-Z0-9_]*$/.test(username)];
         if (!conditionalArray.includes(false)) {
             let newUserObject = await createNewUser(username, email, password);
+            let resObject = {
+                wasCreated: newUserObject.wasCreated,
+                error: newUserObject.error
+            }
             let wasCreated = newUserObject.wasCreated;
             // Send back a proper response if an access token IS in the userObject
             if (wasCreated){
@@ -212,12 +215,12 @@ app.post("/sign-up", async (req, res) => {
                         httpOnly: true,
                         secure: true
                       })
-                    .json({ wasCreated: wasCreated });
+                    .json(resObject);
             }
             else{
                 return res
                     .status(404)
-                    .json({ wasCreated: wasCreated });
+                    .json(resObject);
             }
         }
 });

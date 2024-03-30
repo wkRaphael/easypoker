@@ -12,7 +12,6 @@ const sendPOST = (route, dataToSend, callback) => {
         .then(response => response.json())
         .then(data => callback(null, data))
         .catch(error => callback(error, null));
-    
 }
 
 const sendToApp = () => {
@@ -41,7 +40,7 @@ const login = () => {
                     localStorage.setItem("username", credentials.username);
                     sendToApp();
                 } else {
-                    newAlert(`Logging in with username '${credentials.username}' failed!`, '#FF8A00', 4);
+                    newAlert(`Incorrect password for user '${credentials.username}'`, '#FF8A00', 4);
                 }
             }
         });

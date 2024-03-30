@@ -1,4 +1,6 @@
-sendPOST = (route, dataToSend, callback) => {
+import newAlert from './modules/alertModule.js';
+
+const sendPOST = (route, dataToSend, callback) => {
     const options = {
         method: "POST",
         body: JSON.stringify(dataToSend),
@@ -10,14 +12,13 @@ sendPOST = (route, dataToSend, callback) => {
         .then(response => response.json())
         .then(data => callback(null, data))
         .catch(error => callback(error, null));
-    
 }
 
-sendToApp = () => {
+const sendToApp = () => {
     window.location.href = "/play";
 }
 
-createAccount = () => {
+const createAccount = () => {
     const username = document.getElementById("UsernameInput").value;
     const email = document.getElementById("EmailInput").value;
     const password = document.getElementById("PasswordInput").value;
@@ -33,20 +34,24 @@ createAccount = () => {
         };
         sendPOST(route, credentials, (error, response) => {
             if (error) {
-                console.log(`Attempt to create account with username '${credentials.username}', email '${credentials.email}', and a password failed!`);
+                newAlert(`Attempt to create account with username '${credentials.username}', email '${credentials.email}', and a password failed!`, '#FF0000', 5);
                 console.error(error);
             } else {
-                /** @todo Ensure json property names are implemented correctly!*/ 
-                if (response.createAccountSuccess) {
-                    console.log(`Attempt to create account with username '${credentials.username}', email '${credentials.email}', and a password succeeded!`);
+                if (response.wasCreated) {
+                newAlert(`Account Created!`, '#00FF02', 1);
                     localStorage.setItem("username", credentials.username);
                     sendToApp();
                 } else {
-                    console.log(`Logging in with username '${credentials.username}' failed!`);
+                    newAlert(`Creating account with username '${credentials.username}' failed! <span style="color: #FF6767;"><strong>${response.error}</strong></span>`, '#FF8A00', 4);
                 }
             }
         });
     } else {
-        console.log("Credentials Invalid!")
+        newAlert("Credentials Invalid!", '#FF8A00', 4);
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const loginButton = document.querySelector('.Submit');
+    loginButton.addEventListener('click', createAccount);
+});
