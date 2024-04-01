@@ -42,7 +42,7 @@ const createAccount = () => {
                     localStorage.setItem("username", credentials.username);
                     sendToApp();
                 } else {
-                    newAlert(`Creating account with username '${credentials.username}' failed! <span style="color: #FF6767;"><strong>${response.error}</strong></span>`, '#FF8A00', 4);
+                    newAlert(`<span style="color: #FF6767;"><strong>${response.error}</strong></span>`, '#FF8A00', 4);
                 }
             }
         });

@@ -33,7 +33,7 @@ export default (alertMsg, alertColor, alertLength) => {
     alertDiv.style.margin = '15px';
     alertDiv.style.position = 'relative';
     alertDiv.style.backgroundColor = '#525252';
-    alertDiv.style.height = '100px'
+    alertDiv.style.height = '100px';
     alertDiv.style.color = "#FFFFFF";
     alertDiv.onclick = () => {
         removeAlert(alertDiv.id)
@@ -41,20 +41,30 @@ export default (alertMsg, alertColor, alertLength) => {
     alertDiv.style.borderRadius = borderRadius;
     alertColumn.appendChild(alertDiv);
 
+    let alertProgressBarWrapper = document.createElement('div');
+    alertProgressBarWrapper.className = 'AlertProgressBarWrapper';
+    alertProgressBarWrapper.style.position = 'relative';
+    alertProgressBarWrapper.style.marginRight = '5px';
+    alertDiv.appendChild(alertProgressBarWrapper);
+
     let alertProgressBar = document.createElement('div');
     alertProgressBar.className = 'AlertProgressBar';
+    alertProgressBar.style.position = 'absolute'; 
+    alertProgressBar.style.bottom = '0'; 
+    alertProgressBar.style.left = '0';
     alertProgressBar.id = `AlertProgressBar${alertIndex}`;
     alertProgressBar.style.backgroundColor = alertColor;
     alertProgressBar.style.borderTopLeftRadius = borderRadius;
     alertProgressBar.style.borderBottomLeftRadius = borderRadius;
-    alertProgressBar.style.height = alertDiv.style.offsetHeight;
     alertProgressBar.style.width = 'max(5px, 0.3vh)';
-    alertDiv.appendChild(alertProgressBar);
+    alertProgressBarWrapper.appendChild(alertProgressBar);
 
     let alertWrapper = document.createElement('div');
     alertWrapper.className = 'AlertWrapper';
     alertWrapper.style.padding = '5px';
     alertWrapper.style.width = 'max(150px, 6vw)';
+    alertWrapper.style.display = 'flex';
+    alertWrapper.style.justifyContent = 'center';
     alertWrapper.innerHTML = DOMPurify.sanitize(alertMsg);
 
     alertDiv.appendChild(alertWrapper);
