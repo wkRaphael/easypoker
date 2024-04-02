@@ -1,6 +1,16 @@
-body {
-  /* background-color: #f2f2f2; */
-  background-color: #212121;
+:root{
+  --color-1: #25322e;
+  --color-2: #42564f;
+  --color-3: #c0eb6a;
+  --color-4: #76913f;
+  --color-5: #f7f6e7;
+  --color-6: #dfddc5;
+  --text-color: #FFFFFF;
+}
+body{
+  background-color: var(--color-1);
+  background-image: url("/Icons/playingCardIcons.svg");
+  background-size: 175px;
   font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
@@ -9,37 +19,31 @@ body {
   height: 100vh;
   margin: 0;
 }
-
-.container {
-  /* background-color: #ffffff; */
-  background-color: #333333;
+.container{
+  background-color: var(--color-2);
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   text-align: center;
   margin-bottom: 20px;
 }
-
-.values {
+.values{
   display: flex;
   justify-content: space-around;
   margin-bottom: 20px;
 }
-
-.values p {
+.values p{
   font-variant-emoji: text;
   font-size: 24px;
   font-weight: bold;
   font-family: monospace;
   color: #dcdcdc;
 }
-
-.buttons {
+.buttons{
   display: flex;
   justify-content: space-around;
 }
-
-button {
+button{
   background-color: #4caf50;
   border: none;
   color: white;
@@ -53,13 +57,12 @@ button {
   border-radius: 4px;
   transition: background-color 0.3s;
 }
-
-button:hover {
+button:hover{
   background-color: #45a049;
 }
-.redbutton {
+.redbutton{
   background-color: #af4c4c;
 }
-.redbutton:hover {
+.redbutton:hover{
   background-color: #964141;
 }

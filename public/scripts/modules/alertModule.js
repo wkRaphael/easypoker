@@ -1,4 +1,5 @@
 // Globals
+const backgroundColor = '#4B524C';
 let alertIndex = 0;
 
 const removeAlert = (alertId) => {
@@ -32,7 +33,7 @@ export default (alertMsg, alertColor, alertLength) => {
     alertDiv.style.display = 'flex';
     alertDiv.style.margin = '15px';
     alertDiv.style.position = 'relative';
-    alertDiv.style.backgroundColor = '#525252';
+    alertDiv.style.backgroundColor = `${backgroundColor}`;
     alertDiv.style.height = '100px';
     alertDiv.style.color = "#FFFFFF";
     alertDiv.onclick = () => {

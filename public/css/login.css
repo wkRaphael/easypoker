@@ -1,6 +1,16 @@
-body {
-    /* background-color: #f2f2f2; */
-    background-color: #212121;
+:root{
+    --color-1: #25322e;
+    --color-2: #42564f;
+    --color-3: #c0eb6a;
+    --color-4: #76913f;
+    --color-5: #f7f6e7;
+    --color-6: #dfddc5;
+    --text-color: #FFFFFF;
+}
+body{
+    background-color: var(--color-1);
+    background-image: url("/Icons/playingCardIcons.svg");
+    background-size: 175px;
     font-family: Arial, sans-serif;
     margin: 0;
 }
@@ -9,7 +19,7 @@ a{
 }
 .MenuBar{
     height: var(--MenuBarHeight);
-    background-color: #10A5FF;
+    background-color: var(--color-2);
 }
 .MenuBarContentContainer{
     display: flex;
@@ -39,25 +49,25 @@ a{
     display: inline-block;
     height: auto;
     margin-left: 20px;
-    color: #FCFAFC;
+    color: var(--text-color);
     cursor: pointer;
 }
 .MenuBarLinkButtons:hover{
-    color: #6C686F;
+    color: var(--color-6);
 }
 .Title{
     margin-left: 10px;
-    color: #FCFAFC;
+    color: var(--text-color);
     font-size: max(2.5vh, 20px);
 }
 .MainContentWrapper{
     margin: 10px;
 }
 .AuthenticationSpecifier{
-    color: #FFFFFF;
+    color: var(--text-color);
 }
 .PageName{
-    color: #FFFFFF;
+    color: var(--text-color);
     font-size: max(2vh, 20px);
 }
 .Submit{
