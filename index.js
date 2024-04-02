@@ -8,6 +8,12 @@ const url = require("url");
 require("dotenv").config();
 const poker = require("./modules/poker");
 const mariadb = require('mariadb');
+const cookieParser = require('./modules/cookieParser');
+const expressCookieParser = require('cookie-parser');
+
+// Named Constants
+const accessTokenName = 'access_token';
+
 const pool = mariadb.createPool(
     {
         host: process.env.DB_HOST, 
@@ -28,6 +34,7 @@ const server = http.createServer(app);
 app.set("view engine", "ejs");
 
 app.use(express.json({ limit: "1kb" }));
+app.use(expressCookieParser());
 
 const connectedClients = new Map();
 
@@ -49,16 +56,36 @@ function verifyToken(token) {
     return true;
 }
 
-createJWT = (username) => {
-    const accessToken = jwt.sign(username, process.env.ACCESS_TOKEN_SECRET);
+createJWT = (data) => {
+    const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
     return accessToken;
+}
+
+// Returns JWT data AND verifies that the token was created by the server
+getJWTData = (JWT) => {
+    let data;
+    try {
+        data = jwt.verify(JWT, process.env.ACCESS_TOKEN_SECRET);
+    } catch (err) {
+        data = null;
+    }
+    return data;
+}
+
+checkIsLoggedIn = (cookies) => {
+    let isLoggedIn = false;
+    let JSONCookies = expressCookieParser.JSONCookies(cookies);
+    let token = cookieParser.parseJSONCookiesKey(JSONCookies, accessTokenName);
+    if(token) {
+        if (getJWTData(token))
+        isLoggedIn = true;
+    } 
+    return isLoggedIn;
 }
 
 const wss = new WebSocket.Server({ server });
 
 const port = 3000;
-
-
 
 let shuffledCards = poker.shuffledDeck();
 
@@ -75,7 +102,8 @@ app.get("/", function (req, res) {
 app.get("/play", (req, res) => {
     const token = generateToken();
     const userId = generateUserId();
-    res.render("play", { token: token, userId: userId });
+    const isLoggedIn = checkIsLoggedIn(req.cookies);
+    res.render("play", { token: token, userId: userId, isLoggedIn: isLoggedIn });
 });
 app.get("/login", (req, res) => {
     res.render("login");
@@ -101,7 +129,7 @@ loginUser = async (username, password) => {
             let isPasswordCorrect = await bcrypt.compare(password, hashedPassword[0].password_hash);
             if (isPasswordCorrect){
                 console.log(`Logging in ${username}...`);
-                const accessToken = createJWT(username);
+                const accessToken = createJWT({ username: username });
                 userObject.loginSuccess = isPasswordCorrect;
                 userObject.accessToken = accessToken;
             }
@@ -124,7 +152,7 @@ app.post("/login", async (req, res) => {
             if (loginSuccess){
                 return res
                     .status(200)
-                    .cookie("access_token", userObject.accessToken, {
+                    .cookie(accessTokenName, userObject.accessToken, {
                         path: "/",
                         httpOnly: true,
                         secure: true
@@ -150,7 +178,7 @@ createNewUser = async (username, email, password) => {
             const saltRounds = 10;
             let hashedPassword = await bcrypt.hash(password, saltRounds);
             await pool.query('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', [ username, email, hashedPassword ]);
-            const accessToken = createJWT({ user: username });
+            const accessToken = createJWT({ username: username });
             newUserObject.wasCreated = true;
             newUserObject.accessToken = accessToken;
         }
@@ -181,7 +209,7 @@ app.post("/sign-up", async (req, res) => {
             if (wasCreated){
                 return res
                     .status(200)
-                    .cookie("access_token", newUserObject.accessToken, {
+                    .cookie(accessTokenName, newUserObject.accessToken, {
                         path: "/",
                         httpOnly: true,
                         secure: true
@@ -198,25 +226,28 @@ app.post("/sign-up", async (req, res) => {
 
 // Logs a user out by removing their auth token
 app.post("/logout", async (req, res) => {
+    res.clearCookie(accessTokenName);
     return res
-            // 205 status tells the user agent to reset content from the calling document
-            .status(205)
-            // Set the requesters auth token stored in a cookie to an empty string
-            .cookie("access_token", "")
-            .send()
+            .sendStatus(200)
 });
 
 wss.on("connection", (ws, req) => {
-    const parsedUrl = url.parse(req.url, true);
+    // const parsedUrl = url.parse(req.url, true);
     // Get the clients cookies with 'req.headers.cookie'
-    const token = parsedUrl.query.token;
-    const userId = parsedUrl.query.userId;
+    const token = cookieParser.parseStringCookiesKey(req.headers.cookie, accessTokenName);
+    const JWTData = getJWTData(token);
 
     // Verify the token
-    const isValidToken = verifyToken(token);
-    if (!isValidToken) {
+    if (JWTData == null) {
         ws.close(4001, "Invalid token");
         return;
+    }
+    
+    let userId;
+    try {
+        userId = JWTData.username;
+    } catch (err) {
+        userId = null;
     }
 
     connectedClients.set(ws, userId);

@@ -1,5 +1,5 @@
 const ws = new WebSocket(
-  `ws://${window.location.host}?token=${token}&userId=${userId}`
+  `ws://${window.location.host}`
 );
 
 const card1Element = document.getElementById("card1");
