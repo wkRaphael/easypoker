@@ -18,8 +18,12 @@
                         <a class="MenuBarLinkButtons" href="/">Temp</a>
                     </div>
                     <div class="MenuBarLoginWrapper">
-                        <a class="MenuBarLinkButtons" href="/login">Login</a>
-                        <a class="MenuBarLinkButtons" href="/sign-up">Sign Up</a>
+                        <% if (isLoggedIn == 'false') { %>
+                            <a class="MenuBarLinkButtons" href="/login">Login</a>
+                            <a class="MenuBarLinkButtons" href="/sign-up">Sign Up</a>
+                        <% } else { %>
+                        <a class="MenuBarLinkButtons" href="/login"><%= username %></a>
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -29,5 +33,8 @@
             <p class="Text">An in progress project from wkRaphael and Mcronald!</p>
             <p class="LineSeperator"><button class="Button" onclick="location.href = '/play'">Play</button></p>
         </div>
+        <script>
+            console.log(`Your username is '<%= username %>'`);
+        </script>
     </body>
 </html>

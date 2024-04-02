@@ -72,6 +72,33 @@ getJWTData = (JWT) => {
     return data;
 }
 
+getAccessToken = (cookies) => {
+    let accessToken;
+    try {
+        if (typeof cookies == "string"){
+            accessToken = cookieParser.parseStringCookiesKey(cookies, accessTokenName);
+        } else {
+            accessToken = cookieParser.parseJSONCookiesKey(cookies, accessTokenName);
+        }
+    } catch (err) {
+        console.error("Incorrect type passed to getAccessToken!")
+    }
+    return accessToken;
+}
+
+getUserFromToken = (token) => {
+    let username = null;
+    const data = getJWTData(token);
+    if(data){
+        try {
+            username = data.username;
+        } catch (err) {
+            // Do nothing
+        }
+    }
+    return username;
+}
+
 checkIsLoggedIn = (cookies) => {
     let isLoggedIn = false;
     let JSONCookies = expressCookieParser.JSONCookies(cookies);
@@ -92,12 +119,13 @@ let shuffledCards = poker.shuffledDeck();
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.get("/", function (req, res) {
-    const userId = generateUserId();
-    res.render("root", { userId: userId });
-});
-
 // Handle Get Requests
+
+app.get("/", function (req, res) {
+    const isLoggedIn = checkIsLoggedIn(req.cookies);
+    const username = getUserFromToken(getAccessToken(req.cookies));
+    res.render("root", { username: username, isLoggedIn: isLoggedIn });
+});
 
 app.get("/play", (req, res) => {
     const token = generateToken();
@@ -111,10 +139,6 @@ app.get("/login", (req, res) => {
 
 app.get("/sign-up", (req, res) => {
     res.render("sign-up");
-});
-//This needs to stay the last page
-app.get('*', function(req, res){
-    res.status(404).render("404");
 });
 // Handle Post Requests
 
@@ -231,11 +255,15 @@ app.post("/logout", async (req, res) => {
             .sendStatus(200)
 });
 
+//This needs to stay the last page
+app.get('*', function(req, res){
+    res.status(404).render("404");
+});
+
 wss.on("connection", (ws, req) => {
     // const parsedUrl = url.parse(req.url, true);
     // Get the clients cookies with 'req.headers.cookie'
-    const token = cookieParser.parseStringCookiesKey(req.headers.cookie, accessTokenName);
-    const JWTData = getJWTData(token);
+    const JWTData = getJWTData(getAccessToken(req.headers.cookie));
 
     // Verify the token
     if (JWTData == null) {
