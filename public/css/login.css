@@ -9,7 +9,7 @@
 }
 body{
     background-color: var(--color-1);
-    background-image: url("/Icons/playingCardIcons.svg");
+    background-image: url("/icons/playingCardIcons.svg");
     background-size: 175px;
     font-family: Arial, sans-serif;
     margin: 0;
