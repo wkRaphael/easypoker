@@ -39,6 +39,6 @@ const createAccount = () => {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const loginButton = document.querySelector('.Submit');
+    const loginButton = document.querySelector('#signup');
     loginButton.addEventListener('click', createAccount);
 });

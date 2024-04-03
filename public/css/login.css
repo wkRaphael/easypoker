@@ -6,6 +6,7 @@
     --color-5: #f7f6e7;
     --color-6: #dfddc5;
     --text-color: #FFFFFF;
+    --text-color-2: #b7c990;
 }
 body{
     background-color: var(--color-1);
@@ -13,6 +14,9 @@ body{
     background-size: 175px;
     font-family: Arial, sans-serif;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 a{
     text-decoration: none;
@@ -25,7 +29,6 @@ a{
     display: flex;
     white-space: nowrap;
     height: 100%;
-    display: flex;
     flex-direction: row;
     align-items: center;
     margin-left: var(--ContentMargin);
@@ -60,16 +63,82 @@ a{
     color: var(--text-color);
     font-size: max(2.5vh, 20px);
 }
-.MainContentWrapper{
-    margin: 10px;
+
+.MainContentWrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    width: fit-content;
+    height: fit-content;
+    margin: 0 auto;
+}
+.FindABetterName{
+    text-align: center;
+    background-color: var(--color-2);
+    padding: 10px;
+    font-size: max(2vh, 20px);
+    border-radius: 10px;
 }
 .AuthenticationSpecifier{
     color: var(--text-color);
 }
 .PageName{
+    font-weight: bold;
+    margin-top: 1px;
     color: var(--text-color);
     font-size: max(2vh, 20px);
 }
-.Submit{
-    cursor: pointer;
+.AuthenticationInput {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-5);
+    color: var(--color-1);
+    font-size: 16px;
+    width: 250px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
 }
+
+.AuthenticationInput:focus {
+    outline: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.AuthenticationButton {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-4);
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.AuthenticationButton:hover {
+    background-color: var(--color-3);
+}
+
+.AuthenticationButton:focus {
+    outline: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.AuthenticationButton:active {
+    transform: translateY(1px);
+}
+.AuthenticationSubtext {
+    font-size: max(1.25vh, 10px);
+    color: var(--text-color);
+}
+.AuthenticationSubtextLink:visited {
+    text-decoration: none;color:var(--text-color-2);
+}
+.AuthenticationSubtextLink { text-decoration: none; color:var(--text-color-2); }

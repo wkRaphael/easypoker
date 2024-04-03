@@ -35,8 +35,11 @@ const login = () => {
         newAlert("Credentials Invalid!", '#FF8A00', 4);
     }
 }
+const signup = () => {
 
+   window.location.href = window.location.origin + "/sign-up"
+}
 document.addEventListener('DOMContentLoaded', function () {
-    const loginButton = document.querySelector('.Submit');
+    const loginButton = document.querySelector('#login');
     loginButton.addEventListener('click', login);
 });
