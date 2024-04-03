@@ -17,6 +17,11 @@ body{
 a{
     text-decoration: none;
 }
+ol {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
 .WelcomeMessage{
     margin: 0;
     color: var(--text-color);
@@ -44,6 +49,7 @@ a{
 .MenuBar{
     height: var(--MenuBarHeight);
     background-color: var(--color-2);
+    user-select: none;
 }
 .MenuBarContentContainer{
     display: flex;
@@ -64,6 +70,7 @@ a{
 }
 .MenuBarLoginWrapper{
     display: flex;
+    flex-direction: row;
     margin-left: auto;
     margin-right: 10px;
 }
@@ -78,6 +85,70 @@ a{
 }
 .MenuBarLinkButtons:hover{
     color: var(--color-6);
+}
+.MenuBarLoggedInText{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    margin-left: 20px;
+    color: var(--text-color);
+}
+.MenuBarAccountWrapper{
+    background-color: var(--color-1);
+    border-style: solid;
+    border-color: var(--color-1);
+    border-width: 1px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+.MenuBarAccountButton{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    color: var(--color-3);
+    padding: 3px;
+    cursor: pointer;
+}
+.MenuBarAccountButton:hover{
+    color: var(--color-4);
+}
+#AccountMenu{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    background-color: var(--color-2);
+    border: 2px solid var(--color-1);
+    border-radius: 5px;
+    padding: 5px;
+    list-style: none;
+}
+#ProfileButtonWrapper{
+    border-style: solid;
+    border-bottom-color: var(--color-1);
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    border-width: 2px;
+}
+.AccountMenuButtonWrapper{
+    border-bottom-color: var(--color-1);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.AccountMenuButtons{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    display: inline-block;
+    height: auto;
+    color: var(--text-color);
+    cursor: pointer;
+}
+.AccountMenuButtons:hover{
+    color: var(--color-6);
+}
+.hidden{
+    visibility: hidden;
 }
 .Title{
     margin-left: 10px;

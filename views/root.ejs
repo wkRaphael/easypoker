@@ -18,11 +18,16 @@
                         <a class="MenuBarLinkButtons" href="/">Temp</a>
                     </div>
                     <div class="MenuBarLoginWrapper">
-                        <% if (isLoggedIn == 'false') { %>
+                        <% if (isLoggedIn == false) { %>
                             <a class="MenuBarLinkButtons" href="/login">Login</a>
                             <a class="MenuBarLinkButtons" href="/sign-up">Sign Up</a>
                         <% } else { %>
-                        <a class="MenuBarLinkButtons" href="/login"><%= username %></a>
+                        <div class="MenuBarLoggedInText">Logged in as:</div>
+                        <div class="MenuBarAccountWrapper" id="AccountButtonInactive"><a class="MenuBarAccountButton"><%= username %></a></div>
+                        <ul class="hidden" id="AccountMenu" >
+                            <div class="AccountMenuButtonWrapper" id="ProfileButtonWrapper"><li class="AccountMenuButtons" id="ProfileButton">Profile</li></div>
+                            <div class="AccountMenuButtonWrapper" id="LogoutButtonWrapper"><li class="AccountMenuButtons" id="LogoutButton">Logout</li></div>
+                        </ul>
                         <% } %>
                     </div>
                 </div>
@@ -33,8 +38,6 @@
             <p class="Text">An in progress project from wkRaphael and Mcronald!</p>
             <p class="LineSeperator"><button class="Button" onclick="location.href = '/play'">Play</button></p>
         </div>
-        <script>
-            console.log(`Your username is '<%= username %>'`);
-        </script>
+        <script type="module" src="/scripts/root.js"></script>
     </body>
 </html>
