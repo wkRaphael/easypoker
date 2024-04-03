@@ -2,15 +2,15 @@ const path = require('node:path');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const express = require("express");
-const http = require("http");
-const WebSocket = require("ws");
-const url = require("url");
+const WebSocket = require("socket.io");
 require("dotenv").config();
 const poker = require("./modules/poker");
 const mariadb = require('mariadb');
 const cookieParser = require('./modules/cookieParser');
 const expressCookieParser = require('cookie-parser');
-
+const app = express();
+const server = require('http').createServer(app);
+const wss = require("socket.io")(server);
 // Named Constants
 const accessTokenName = 'access_token';
 
@@ -29,8 +29,7 @@ pool.getConnection((err, connection) => {
     }
 });
 
-const app = express();
-const server = http.createServer(app);
+
 app.set("view engine", "ejs");
 
 app.use(express.json({ limit: "1kb" }));
@@ -38,31 +37,12 @@ app.use(expressCookieParser());
 
 const connectedClients = new Map();
 
-function generateToken() {
-    // Example: Generate a random token
-    const token = Math.random().toString(36).substring(7);
-    return token;
-}
-
-function generateUserId() {
-    // Example: Generate a random user ID
-    const userId = Math.random().toString(36).substring(7);
-    return userId;
-}
-
-function verifyToken(token) {
-    // Example: Check if the token is valid
-    const validTokens = ["token1", "token2", "token3"];
-    return true;
-}
-
-createJWT = (data) => {
-    const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
-    return accessToken;
+function createJWT(data) {
+    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
 }
 
 // Returns JWT data AND verifies that the token was created by the server
-getJWTData = (JWT) => {
+function getJWTData(JWT) {
     let data;
     try {
         data = jwt.verify(JWT, process.env.ACCESS_TOKEN_SECRET);
@@ -72,7 +52,7 @@ getJWTData = (JWT) => {
     return data;
 }
 
-getAccessToken = (cookies) => {
+function getAccessToken(cookies) {
     let accessToken;
     try {
         if (typeof cookies == "string"){
@@ -86,7 +66,7 @@ getAccessToken = (cookies) => {
     return accessToken;
 }
 
-getUserFromToken = (token) => {
+function getUserFromToken(token) {
     let username = null;
     const data = getJWTData(token);
     if(data){
@@ -99,7 +79,7 @@ getUserFromToken = (token) => {
     return username;
 }
 
-checkIsLoggedIn = (cookies) => {
+function checkIsLoggedIn(cookies) {
     let isLoggedIn = false;
     let JSONCookies = expressCookieParser.JSONCookies(cookies);
     let token = cookieParser.parseJSONCookiesKey(JSONCookies, accessTokenName);
@@ -110,28 +90,34 @@ checkIsLoggedIn = (cookies) => {
     return isLoggedIn;
 }
 
-const wss = new WebSocket.Server({ server });
-
 const port = 3000;
-
 let shuffledCards = poker.shuffledDeck();
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Handle Get Requests
+function loggedIn(req) {
+    return !getUserFromToken(getAccessToken(req.cookies));
 
+}
 app.get("/", function (req, res) {
     const isLoggedIn = checkIsLoggedIn(req.cookies);
     const username = getUserFromToken(getAccessToken(req.cookies));
     res.render("root", { username: username, isLoggedIn: isLoggedIn });
 });
 
-app.get("/play", (req, res) => {
-    const token = generateToken();
-    const userId = generateUserId();
+app.get("/play/:roomID", (req, res) => {
+    console.log(`RoomID: ${req.params["roomID"]}`);
     const isLoggedIn = checkIsLoggedIn(req.cookies);
-    res.render("play", { token: token, userId: userId, isLoggedIn: isLoggedIn });
+    res.render("play", { isLoggedIn: isLoggedIn });
+});
+app.get("/play", (req, res) => {
+    if (loggedIn(req)) {
+        return res.redirect("/login")
+    }
+    let randomString = (Math.random() + 1).toString(36).substring(2);
+    res.redirect(`/play/${randomString}`)
 });
 app.get("/login", (req, res) => {
     res.render("login");
@@ -197,7 +183,7 @@ createNewUser = async (username, email, password) => {
         wasCreated: wasAccountCreated
     }
     try{
-        if ((await pool.query('SELECT * FROM users WHERE username = ?', username)).length == 0){
+        if ((await pool.query('SELECT * FROM users WHERE username = ?', username)).length === 0){
             console.log(`Creating new user with username: ${username}`);
             const saltRounds = 10;
             let hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -259,51 +245,42 @@ app.post("/logout", async (req, res) => {
 app.get('*', function(req, res){
     res.status(404).render("404");
 });
-
-wss.on("connection", (ws, req) => {
-    // const parsedUrl = url.parse(req.url, true);
-    // Get the clients cookies with 'req.headers.cookie'
-    const JWTData = getJWTData(getAccessToken(req.headers.cookie));
-
-    // Verify the token
-    if (JWTData == null) {
-        ws.close(4001, "Invalid token");
-        return;
+wss.use((socket, next) => {
+    const JWTData = getJWTData(getAccessToken(socket.handshake.headers.cookie));
+    if (!JWTData){
+        next(new Error("Token was null"));
     }
-
-    let userId;
-    try {
-        userId = JWTData.username;
-    } catch (err) {
-        userId = null;
+    else {
+        socket.username = JWTData.username;
+        next();
     }
+});
+wss.on("connection", (ws) => {
+    const userId = ws.username;
 
     connectedClients.set(ws, userId);
 
     console.log(`WebSocket connected - User ID: ${userId}`);
-    ws.send(JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
 
-     ws.on("message", (message) => {
-        if (message.toString() === "shuffle") {
-            shuffledCards = poker.shuffledDeck()
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-            client.send(
-                JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] })
-            );
-            }
-        });
-    }
-    console.log(`Message: ${message} User ID: ${connectedClients.get(ws)}`);
-});
+    ws.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
 
-ws.on("close", () => {
-    console.log(
-        `WebSocket disconnected - User ID: ${connectedClients.get(ws)}`
-    );
-    connectedClients.delete(ws);
+     ws.on("message", (event, arg1) => {
+         if (event === "shuffle") {
+             shuffledCards = poker.shuffledDeck()
+             ws.emit("updateHand", JSON.stringify({card1: shuffledCards[0], card2: shuffledCards[1]}));
+         }
+         console.log(`Message: ${event} User ID: ${connectedClients.get(ws)}`);
+    });
+
+    ws.on("close", () => {
+        console.log(
+            `WebSocket disconnected - User ID: ${connectedClients.get(ws)}`
+        );
+        connectedClients.delete(ws);
     });
 });
+
+
 
 server.listen(port, function () {
     console.log(`EasyPoker server listening on port ${port}!`);

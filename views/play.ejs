@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>Easy Poker</title>
     <link rel="stylesheet" type="text/css" href="/css/play.css" />
@@ -26,28 +26,9 @@
         <button onclick="raise()">Raise</button>
       </div>
       <div class="buttons">
-        <button class="redbutton" onclick="shuffle()">Shuffle</button>
+        <button class="red-button" onclick="shuffle()">Shuffle</button>
       </div>
-      <script>
-        const token = "<%= token %>";
-        const userId = "<%= userId %>";
-        // find a better way to get a boolean...
-        const isLoggedIn = ("<%= isLoggedIn %>" === 'true') ? true: false;
-        if(!isLoggedIn) {
-          console.log("executing dom")
-          let warningDiv = document.createElement('p');
-          warningDiv.className = 'WarningMessage';
-          warningDiv.innerText = "Warning: You are not logged in and won't be able to play!";
-          warningDiv.style.fontSize = '25px';
-          warningDiv.style.fontWeight = 'bold';
-          warningDiv.style.color = '#FF0000';
-          warningDiv.style.position = 'absolute';
-          warningDiv.style.top = '0';
-          warningDiv.style.left = '50%';
-          warningDiv.style.transform = 'translate(-50%, -50%)';
-          document.body.appendChild(warningDiv);
-        }
-      </script>
+      <script src="/socket.io/socket.io.js"></script>
       <script src="/scripts/play.js"></script>
     </div>
   </body>

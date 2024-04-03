@@ -1,22 +1,19 @@
-const ws = new WebSocket(
-  `ws://${window.location.host}`
-);
+const ws = io();
 
 const card1Element = document.getElementById("card1");
 const card2Element = document.getElementById("card2");
 
-ws.onopen = () => {
+ws.onOpen = () => {
   console.log("WebSocket connected");
 };
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
+ws.on("updateHand", (cards) => {
+  const data = JSON.parse(cards);
   card1Element.textContent = data.card1;
   card2Element.textContent = data.card2;
 
   setCardColor(card1Element, data.card1);
   setCardColor(card2Element, data.card2);
-};
+});
 
 ws.onclose = () => {
   console.log("WebSocket disconnected");
@@ -35,19 +32,22 @@ function shuffle() {
 }
 
 function call() {
-  console.log("Called!");
+  ws.send("call");
 }
 
 function check() {
-  console.log("Checked!");
+  ws.send("check");
+}
+function joinGame() {
+  ws.send("joinGame");
 }
 
 function fold() {
   card1Element.style.color = "#cccccc";
   card2Element.style.color = "#cccccc";
-  console.log("Folded!");
+  ws.send("fold");
 }
 
 function raise() {
-  console.log("Raise!");
+  ws.send("raise", "test");
 }
