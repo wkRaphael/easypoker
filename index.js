@@ -124,7 +124,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.get("/", function (req, res) {
     const isLoggedIn = checkIsLoggedIn(req.cookies);
     const username = getUserFromToken(getAccessToken(req.cookies));
-    console.log(`Username '${username} is logged in? ${isLoggedIn}'`)
     res.render("root", { username: username, isLoggedIn: isLoggedIn });
 });
 
