@@ -9,8 +9,8 @@
 }
 body {
   background-color: var(--color-1);
-  background-image: url("/icons/playingCardIcons.svg");
-  background-size: 175px;
+  background-image: url("/icons/background.png");
+  background-size: 512px;
   font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
