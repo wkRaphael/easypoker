@@ -28,12 +28,18 @@
             <div class="FindABetterName">
             <p class="PageName">Sign Up</p>
             <div class="AuthenticationWrapper">
-                <label class="AuthenticationSpecifier" for="UsernameInput">Username:</label>
-                <input class="AuthenticationInput" id="UsernameInput" type="text"><br><br>
-                <label class="AuthenticationSpecifier" for="EmailInput">Email:</label>
-                <input class="AuthenticationInput" id="EmailInput" type="email"><br><br>
-                <label class="AuthenticationSpecifier" for="PasswordInput">Password:</label>
-                <input class="AuthenticationInput" id="PasswordInput" type="password"><br><br>
+                <div class="AuthenticationField">
+                    <label class="AuthenticationSpecifier" for="UsernameInput">Username:</label><br>
+                    <input class="AuthenticationInput" id="UsernameInput" type="text">
+                </div>
+                <div class="AuthenticationField">
+                    <label class="AuthenticationSpecifier" for="EmailInput">Email:</label><br>
+                    <input class="AuthenticationInput" id="EmailInput" type="email">
+                </div>
+                <div class="AuthenticationField">
+                    <label class="AuthenticationSpecifier" for="PasswordInput">Password:</label><br>
+                    <input class="AuthenticationInput" id="PasswordInput" type="password">
+                </div>
                 <button class="AuthenticationButton" id="signup">Create Account</button>
                 <p class="AuthenticationSubtext">Already have an account? <a class="AuthenticationSubtextLink" href="/login">Login</a></p>
             </div>

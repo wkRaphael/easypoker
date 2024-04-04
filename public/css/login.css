@@ -77,11 +77,17 @@ a{
 .FindABetterName{
     text-align: center;
     background-color: var(--color-2);
-    padding: 10px;
+    padding: 10px 20px 10px 20px;
     font-size: max(2vh, 20px);
     border-radius: 10px;
 }
+.AuthenticationField{
+    margin-bottom: 10px;
+    text-align: left;
+}
 .AuthenticationSpecifier{
+    font-size: max(1vh, 10px);
+    text-align: center;
     color: var(--text-color);
 }
 .PageName{
