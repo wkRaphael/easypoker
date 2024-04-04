@@ -48,7 +48,9 @@ function getJWTData(JWT) {
   }
   return data;
 }
-
+function isString(possibleString) {
+  return typeof possibleString == "string";
+}
 function getAccessToken(cookies) {
   let accessToken;
   try {
@@ -104,13 +106,33 @@ app.get("/play/:roomID", (req, res) => {
   const isLoggedIn = checkIsLoggedIn(req.cookies);
   res.render("play", { isLoggedIn: isLoggedIn });
 });
+
 app.get("/play", (req, res) => {
-  if (checkIsLoggedIn(req.cookies)) {
+  if (!checkIsLoggedIn(req.cookies)) {
     return res.redirect("/login");
   }
   let randomString = (Math.random() + 1).toString(36).substring(2);
   res.redirect(`/play/${randomString}`);
 });
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.get("/coinflip/:roomID", (req, res) => {
+  console.log(`RoomID: ${req.params["roomID"]}`);
+  const isLoggedIn = checkIsLoggedIn(req.cookies);
+  res.render("coinflip", { isLoggedIn: isLoggedIn });
+});
+
+app.get("/coinflip", (req, res) => {
+  if (!checkIsLoggedIn(req.cookies)) {
+    return res.redirect("/coinflip");
+  }
+  let randomString = (Math.random() + 1).toString(36).substring(2);
+  res.redirect(`/coinflip/${randomString}`);
+});
+
 app.get("/login", (req, res) => {
   res.render("login");
 });
@@ -118,8 +140,13 @@ app.get("/login", (req, res) => {
 app.get("/sign-up", (req, res) => {
   res.render("sign-up");
 });
-// Handle Post Requests
 
+//This needs to stay the last get request
+app.get("*", function (req, res) {
+  res.status(404).render("404");
+});
+
+// Handle Post Requests
 loginUser = async (username, password) => {
   let userObject = {
     loginSuccess: false,
@@ -223,10 +250,6 @@ app.post("/logout", async (req, res) => {
   return res.sendStatus(200);
 });
 
-//This needs to stay the last page
-app.get("*", function (req, res) {
-  res.status(404).render("404");
-});
 wss.use((socket, next) => {
   const JWTData = getJWTData(getAccessToken(socket.handshake.headers.cookie));
   if (!JWTData) {
@@ -236,6 +259,7 @@ wss.use((socket, next) => {
     next();
   }
 });
+
 wss.on("connection", (ws) => {
   const userId = ws.username;
 
@@ -249,6 +273,13 @@ wss.on("connection", (ws) => {
     if (event === "shuffle") {
       shuffledCards = poker.shuffledDeck();
       ws.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
+    }
+    if (event === "joinGame" && arg1 && isString(arg1) && /^[a-zA-Z0-9]+$/.test(arg1)) {
+      // TODO: make a proper way to create and check if rooms exist
+      ws.join(arg1);
+    }
+    if (event === "start") {
+      wss.to(arg1).emit("getResult", "Hello World!");
     }
     console.log(`Message: ${event} User ID: ${connectedClients.get(ws)}`);
   });

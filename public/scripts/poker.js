@@ -51,3 +51,14 @@ function fold() {
 function raise() {
   ws.send("raise", "test");
 }
+
+function clickListener(selector, functionCalled) {
+  document.querySelector(selector).addEventListener("click", functionCalled);
+}
+document.addEventListener("DOMContentLoaded", function () {
+  clickListener("#call", call);
+  clickListener("#check", check);
+  clickListener("#fold", fold);
+  clickListener("#raise", raise);
+  clickListener("#shuffle", shuffle);
+});
