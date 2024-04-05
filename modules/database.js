@@ -2,6 +2,9 @@
 const mariadb = require("mariadb");
 require("dotenv").config();
 
+let isInitialization = true;
+let conn;
+
 //Initialize Pool
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,
@@ -13,7 +16,11 @@ const pool = mariadb.createPool({
 
 // Fetch Connection
 async function fetchConn() {
-    let conn = await pool.getConnection();
+    if (isInitialization){
+        conn = await pool.getConnection();
+        isInitialization = false;
+    }
+    
     console.log("Database connected!");
     console.log("Total connections: ", pool.totalConnections());
     console.log("Active connections: ", pool.activeConnections());
