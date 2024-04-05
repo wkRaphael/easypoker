@@ -77,7 +77,7 @@ export default (alertMsg, alertColor, alertLength) => {
     const interval = setInterval(() => {
         timer -= 1; // Decrease timer
         const previousHeight = parseInt(alertProgressBar.style.height, 10);
-        if (previousHeight != Math.round(timer / alertLength)){
+        if (previousHeight !== Math.round(timer / alertLength)){
             alertProgressBar.style.height = `${Math.round(timer / alertLength)}%`;
         }
         if (timer <= 0) {

@@ -9,7 +9,7 @@ function parseStringCookiesKey(cookie, key) {
     // Split each keyPair
     cookie.forEach((keyPair) => {
         let keyArray = keyPair.split('=')
-        if (keyArray[0] == key){
+        if (keyArray[0] === key){
             value = keyArray[1];
         }
     })

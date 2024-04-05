@@ -1,3 +1,5 @@
+// noinspection JSValidateTypes
+
 const path = require("node:path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -20,13 +22,7 @@ const pool = mariadb.createPool({
   database: "db_easy_poker",
   connectionLimit: 50,
 });
-
-pool.getConnection((err, connection) => {
-  if (connection) {
-    connection.release();
-  }
-});
-
+pool.getConnection().then((connection) => connection.release()).catch(err => console.error(err));
 app.set("view engine", "ejs");
 
 app.use(express.json({ limit: "1kb" }));
@@ -155,7 +151,7 @@ loginUser = async (username, password) => {
     // Make sure the user exists in the database first!
     if ((await pool.query("SELECT * FROM users WHERE username = ?", username)).length > 0) {
       let hashedPassword = await pool.query("SELECT password_hash FROM users WHERE username = ?", username);
-      let isPasswordCorrect = await bcrypt.compare(password, hashedPassword[0].password_hash);
+      let isPasswordCorrect = await bcrypt.compare(password, hashedPassword[0]["password_hash"]);
       if (isPasswordCorrect) {
         console.log(`Logging in ${username}...`);
         const accessToken = createJWT({ username: username });
@@ -264,7 +260,6 @@ wss.on("connection", (ws) => {
   const userId = ws.username;
 
   connectedClients.set(ws, userId);
-
   console.log(`WebSocket connected - User ID: ${userId}`);
 
   ws.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
@@ -291,5 +286,5 @@ wss.on("connection", (ws) => {
 });
 
 server.listen(port, function () {
-  console.log(`EasyPoker server listening on port ${port}!`);
+  console.log(`EasyPoker server listening on port http://127.0.0.1:${port}!`);
 });
