@@ -6,8 +6,8 @@ const jwt = require("jsonwebtoken");
 const express = require("express");
 require("dotenv").config();
 const poker = require("./modules/poker");
-const mariadb = require("mariadb");
 const cookieParser = require("./modules/cookieParser");
+const database = require("./modules/database");
 const expressCookieParser = require("cookie-parser");
 const app = express();
 const server = require("http").createServer(app);
@@ -15,20 +15,10 @@ const wss = require("socket.io")(server);
 // Named Constants
 const accessTokenName = "access_token";
 
-const pool = mariadb.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: "db_easy_poker",
-  connectionLimit: 50,
-});
-pool.getConnection().then((connection) => connection.release()).catch(err => console.error(err));
 app.set("view engine", "ejs");
 
 app.use(express.json({ limit: "1kb" }));
 app.use(expressCookieParser());
-
-const connectedClients = new Map();
 
 function createJWT(data) {
   return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
@@ -144,13 +134,15 @@ app.get("*", function (req, res) {
 
 // Handle Post Requests
 loginUser = async (username, password) => {
+  // Get DB connection
+  const conn = await database.fetchConn();
   let userObject = {
     loginSuccess: false,
   };
   try {
     // Make sure the user exists in the database first!
-    if ((await pool.query("SELECT * FROM users WHERE username = ?", username)).length > 0) {
-      let hashedPassword = await pool.query("SELECT password_hash FROM users WHERE username = ?", username);
+    if ((await conn.query("SELECT * FROM users WHERE username = ?", username)).length > 0) {
+      let hashedPassword = await conn.query("SELECT password_hash FROM users WHERE username = ?", username);
       let isPasswordCorrect = await bcrypt.compare(password, hashedPassword[0]["password_hash"]);
       if (isPasswordCorrect) {
         console.log(`Logging in ${username}...`);
@@ -189,16 +181,18 @@ app.post("/login", async (req, res) => {
 });
 
 createNewUser = async (username, email, password) => {
+  // Get DB connection
+  const conn = await database.fetchConn();
   let wasAccountCreated = false;
   let newUserObject = {
     wasCreated: wasAccountCreated,
   };
   try {
-    if ((await pool.query("SELECT * FROM users WHERE username = ?", username)).length === 0) {
+    if ((await conn.query("SELECT * FROM users WHERE username = ?", username)).length === 0) {
       console.log(`Creating new user with username: ${username}`);
       const saltRounds = 10;
       let hashedPassword = await bcrypt.hash(password, saltRounds);
-      await pool.query("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", [username, email, hashedPassword]);
+      await conn.query("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", [username, email, hashedPassword]);
       const accessToken = createJWT({ username: username });
       newUserObject.wasCreated = true;
       newUserObject.accessToken = accessToken;
@@ -245,6 +239,8 @@ app.post("/logout", async (req, res) => {
   res.clearCookie(accessTokenName);
   return res.sendStatus(200);
 });
+
+const connectedClients = new Map();
 
 wss.use((socket, next) => {
   const JWTData = getJWTData(getAccessToken(socket.handshake.headers.cookie));
