@@ -1,0 +1,162 @@
+:root{
+    --color-1: #25322e;
+    --color-2: #42564f;
+    --color-3: #c0eb6a;
+    --color-4: #76913f;
+    --color-5: #f7f6e7;
+    --color-6: #dfddc5;
+    --text-color: #FFFFFF;
+}
+html {
+    height: 100%;
+}
+body{
+    background-color: var(--color-1);
+    background-image: url("/icons/background.png");
+    background-size: 512px;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    margin: 0;
+}
+a{
+    text-decoration: none;
+}
+ol {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+.Text{
+    color: var(--text-color);
+    size: 12px;
+}
+.Button{
+    margin-top: 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    color: var(--text-color);
+    background-color: var(--color-2);
+}
+.Button:hover {
+    color: var(--color-6);
+}
+.MenuBar{
+    height: var(--MenuBarHeight);
+    background-color: var(--color-2);
+    user-select: none;
+}
+.MenuBarContentContainer{
+    display: flex;
+    white-space: nowrap;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: var(--ContentMargin);
+    margin-right: var(--ContentMargin);
+}
+.MenuBarTitleWrapper{
+    display: flex;
+}
+.MenuBarLinkButtonsWrapper{
+    display: flex;
+    height: fit-content;
+}
+.MenuBarLoginWrapper{
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+    margin-right: 10px;
+}
+.MenuBarLinkButtons{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    display: inline-block;
+    height: auto;
+    margin-left: 20px;
+    color: var(--text-color);
+    cursor: pointer;
+}
+.MenuBarLinkButtons:hover{
+    color: var(--color-6);
+}
+.MenuBarLoggedInText{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    margin-left: 20px;
+    color: var(--text-color);
+}
+.MenuBarAccountWrapper{
+    background-color: var(--color-1);
+    border-style: solid;
+    border-color: var(--color-1);
+    border-width: 1px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+.MenuBarAccountButton{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    color: var(--color-3);
+    padding: 3px;
+    cursor: pointer;
+}
+.MenuBarAccountButton:hover{
+    color: var(--color-4);
+}
+#AccountMenu{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    background-color: var(--color-2);
+    border: 2px solid var(--color-1);
+    border-radius: 5px;
+    padding: 5px;
+    list-style: none;
+}
+#ProfileButtonWrapper{
+    border-style: solid;
+    border-bottom-color: var(--color-1);
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    border-width: 2px;
+}
+.AccountMenuButtonWrapper{
+    border-bottom-color: var(--color-1);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.AccountMenuButtons{
+    font-size: max(1.5vh, 15px);
+    font-family: Aptos, Arial, sans-serif;
+    display: inline-block;
+    height: auto;
+    color: var(--text-color);
+    cursor: pointer;
+}
+.AccountMenuButtons:hover{
+    color: var(--color-6);
+}
+.hidden{
+    visibility: hidden;
+}
+.Title{
+    margin-left: 10px;
+    color: var(--text-color);
+    font-size: max(2.5vh, 20px);
+}
+.MainContentWrapper{
+    display: flex;
+    margin-top: min(10px, 1vh);
+    margin-bottom: min(10px, 1vh);
+    margin-left: 25vw;
+    margin-right: 25vw;
+    border-radius: 5px;
+    height: fit-content;
+    background-color: var(--color-2);
+}

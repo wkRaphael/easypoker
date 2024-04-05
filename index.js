@@ -81,10 +81,34 @@ let shuffledCards = poker.shuffledDeck();
 app.use(express.static(path.join(__dirname, "public")));
 
 // Handle Get Requests
-app.get("/", function (req, res) {
+app.get("/", (req, res) => {
   const isLoggedIn = checkIsLoggedIn(req.cookies);
   const username = getUserFromToken(getAccessToken(req.cookies));
   res.render("root", { username: username, isLoggedIn: isLoggedIn });
+});
+
+async function checkIfUserExists(username) {
+  const conn = await database.fetchConn();
+  let userExists = false
+  if ((await conn.query("SELECT * FROM users WHERE username = ?", username)).length > 0) {
+    userExists = true;
+  }
+  return userExists;
+}
+
+app.get("/profile/:username", async (req, res) => {
+  const username = getUserFromToken(getAccessToken(req.cookies));
+  const profileOf = req.params['username'];
+  const isLoggedIn = checkIsLoggedIn(req.cookies);
+  console.log(`Serving profile page for username '${profileOf}'`);
+  if (await checkIfUserExists(profileOf)){
+    res.render("profile", { isLoggedIn: isLoggedIn, profileOf: profileOf, username: username })
+  } else {
+    console.log(`User '${username}' does not exist!`)
+    res
+      .status(404)
+      .render("404");
+  }
 });
 
 app.get("/play/:roomID", (req, res) => {
@@ -129,11 +153,13 @@ app.get("/sign-up", (req, res) => {
 
 //This needs to stay the last get request
 app.get("*", function (req, res) {
-  res.status(404).render("404");
+  res
+    .status(404)
+    .render("404");
 });
 
 // Handle Post Requests
-loginUser = async (username, password) => {
+async function loginUser (username, password) {
   // Get DB connection
   const conn = await database.fetchConn();
   let userObject = {
@@ -155,7 +181,7 @@ loginUser = async (username, password) => {
     console.error(err);
   }
   return userObject;
-};
+}
 
 app.post("/login", async (req, res) => {
   const username = req.body.username;
@@ -180,7 +206,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-createNewUser = async (username, email, password) => {
+async function createNewUser(username, email, password) {
   // Get DB connection
   const conn = await database.fetchConn();
   let wasAccountCreated = false;
@@ -204,7 +230,7 @@ createNewUser = async (username, email, password) => {
     console.error(err);
   }
   return newUserObject;
-};
+}
 
 app.post("/sign-up", async (req, res) => {
   const username = req.body.username;
