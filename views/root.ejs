@@ -25,7 +25,7 @@
             <div class="MenuBarLoggedInText">Logged in as:</div>
             <div class="MenuBarAccountWrapper" id="AccountButtonInactive"><a class="MenuBarAccountButton"><%= username %></a></div>
             <ul class="hidden" id="AccountMenu">
-              <div class="AccountMenuButtonWrapper" id="ProfileButtonWrapper"><li class="AccountMenuButtons" id="ProfileButton">Profile</li></div>
+              <div class="AccountMenuButtonWrapper" id="ProfileButtonWrapper"><a class="AccountMenuButtons" id="ProfileButton" href="/profile/<%= username %>">Profile</a></div>
               <div class="AccountMenuButtonWrapper" id="LogoutButtonWrapper"><li class="AccountMenuButtons" id="LogoutButton">Logout</li></div>
             </ul>
             <% } %>
