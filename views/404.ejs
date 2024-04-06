@@ -1,29 +1,11 @@
 <!DOCTYPE html>
 <link rel="stylesheet" type="text/css" href="/css/root.css" />
-<html>
+<html lang="en">
   <head>
     <title>Easy Poker</title>
   </head>
   <body>
-    <header>
-      <div class="MenuBar" id="MenuBar">
-        <div class="MenuBarContentContainer" id="MenuBarContentContainer">
-          <div class="MenuBarTitleWrapper">
-            <a class="Title" id="Title" href="/">Easy Poker</a>
-          </div>
-          <div class="MenuBarLinkButtonsWrapper">
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-          </div>
-          <div class="MenuBarLoginWrapper">
-            <a class="MenuBarLinkButtons" href="/login">Login</a>
-            <a class="MenuBarLinkButtons" href="/sign-up">Sign Up</a>
-          </div>
-        </div>
-      </div>
-    </header>
+  <%- include("menubar.ejs") %>
     <div class="MainContentWrapper">
       <h1 class="WelcomeMessage">Error 404</h1>
       <p class="Text">Page not found</p>

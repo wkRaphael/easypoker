@@ -77,14 +77,22 @@ function checkIsLoggedIn(cookies) {
 const port = 3000;
 let shuffledCards = poker.shuffledDeck();
 
+function menuBar(reqCookies, otherOptions) {
+  const isLoggedIn = checkIsLoggedIn(reqCookies);
+  const username = getUserFromToken(getAccessToken(reqCookies));
+  let options = { username: username, isLoggedIn: isLoggedIn };
+  if (typeof(otherOptions) == "object") {
+    return {...options, ...otherOptions}
+  }
+  return options
+}
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // Handle Get Requests
 app.get("/", (req, res) => {
-  const isLoggedIn = checkIsLoggedIn(req.cookies);
-  const username = getUserFromToken(getAccessToken(req.cookies));
-  res.render("root", { username: username, isLoggedIn: isLoggedIn });
+
+  res.render("root", menuBar(req.cookies));
 });
 
 async function checkIfUserExists(username) {
@@ -99,30 +107,29 @@ async function checkIfUserExists(username) {
 app.get("/profile/:username", async (req, res) => {
   const username = getUserFromToken(getAccessToken(req.cookies));
   const profileOf = req.params['username'];
-  const isLoggedIn = checkIsLoggedIn(req.cookies);
   console.log(`Serving profile page for username '${profileOf}'`);
   if (await checkIfUserExists(profileOf)){
-    res.render("profile", { isLoggedIn: isLoggedIn, profileOf: profileOf, username: username })
+    res.render("profile", menuBar(req.cookies, {profileOf: profileOf}))
   } else {
     console.log(`User '${username}' does not exist!`)
     res
       .status(404)
-      .render("404");
+      .render("404", menuBar(req.cookies));
   }
 });
 
-app.get("/play/:roomID", (req, res) => {
+app.get("/poker/:roomID", (req, res) => {
   console.log(`RoomID: ${req.params["roomID"]}`);
   const isLoggedIn = checkIsLoggedIn(req.cookies);
-  res.render("play", { isLoggedIn: isLoggedIn });
+  res.render("poker", { isLoggedIn: isLoggedIn });
 });
 
-app.get("/play", (req, res) => {
+app.get("/poker", (req, res) => {
   if (!checkIsLoggedIn(req.cookies)) {
     return res.redirect("/login");
   }
   let randomString = (Math.random() + 1).toString(36).substring(2);
-  res.redirect(`/play/${randomString}`);
+  res.redirect(`/poker/${randomString}`);
 });
 
 app.get("/login", (req, res) => {
@@ -155,7 +162,7 @@ app.get("/sign-up", (req, res) => {
 app.get("*", function (req, res) {
   res
     .status(404)
-    .render("404");
+    .render("404",menuBar(req.cookies));
 });
 
 // Handle Post Requests
