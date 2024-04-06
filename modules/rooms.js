@@ -41,22 +41,28 @@ async function addPlayerToRoom(player, roomName) {
     let result = null;
     const conn = await database.fetchConn();
 
-    let playerJSON = await conn.query("SELECT room_players FROM rooms WHERE room_name = ?", roomName);
-    const roomExists =  ((playerJSON).length > 0);
+    let roomData = await conn.query("SELECT * FROM rooms WHERE room_name = ?", roomName);
+    const roomExists =  ((roomData).length > 0);
     const playerExists =  ((await conn.query("SELECT user_id FROM users WHERE username = ?", player)).length > 0);
+    if (!roomExists) return "room does not exist";
+    if (!playerExists) return "player does not exist";
 
-    let playerArray = playerJSON[0].room_players.playerArray;
+    let playerArray;
+    if(roomData[0]["room_players"]) {
+        playerArray = roomData[0]["room_players"].playerArray;
 
-    if (roomExists && playerExists && !(playerArray.includes(player))){
-        if (playerArray == null) {
-            playerArray = [];
-            playerArray.push(player);
-            result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
-        } else {
-            playerArray.push(player);
-            result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
+        if (playerArray.includes(player)) {
+            return "player already in room";
         }
+        if (playerArray.length + 1 > roomData[0]["room_maxplayers"]) return "max player already in room";
+        playerArray.push(player);
+        result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
+    } else {
+        playerArray = [];
+        playerArray.push(player);
+        result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
     }
+
     return result;
 }
 
@@ -74,7 +80,7 @@ async function createRoom(roomName, type, isPublic, maxPlayers) {
     let result = null;
     console.log(`Creating new room with name '${roomName}', type '${type}', public status '${isPublic}', and max players of '${maxPlayers}'`);
     const conn = await database.fetchConn();
-    if ((await conn.query("SELECT id FROM rooms WHERE room_name = ?", roomName)).length == 0) {
+    if ((await conn.query("SELECT id FROM rooms WHERE room_name = ?", roomName)).length === 0) {
         result = await conn.query("INSERT INTO rooms (room_name, room_type, room_ispublic, room_maxplayers) VALUES (?, ?, ?, ?)", [roomName, type, isPublic, maxPlayers]);
     }
     return result;
