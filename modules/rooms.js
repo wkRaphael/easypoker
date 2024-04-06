@@ -6,6 +6,17 @@ async function getRooms() {
     return await conn.query("SELECT * FROM rooms");
 }
 
+async function isPlayerInRoom(player, roomName) {
+    let result = false;
+    const players = await getPlayersInRoom(roomName);
+    if (players) {
+        if (players.includes(player)) {
+            result = true;
+        }
+    }
+    return result;
+}
+
 async function getPlayersInRoom(roomName) {
     let result = null;
     const conn = await database.fetchConn();
@@ -50,7 +61,6 @@ async function addPlayerToRoom(player, roomName) {
     let playerArray;
     if(roomData[0]["room_players"]) {
         playerArray = roomData[0]["room_players"].playerArray;
-
         if (playerArray.includes(player)) {
             return "player already in room";
         }
@@ -92,5 +102,6 @@ module.exports = {
     getRooms,
     addPlayerToRoom,
     removePlayerFromRoom,
-    getPlayersInRoom
+    getPlayersInRoom,
+    isPlayerInRoom
 }

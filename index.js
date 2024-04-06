@@ -1,17 +1,17 @@
 // noinspection JSValidateTypes
-
 const path = require("node:path");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const express = require("express");
 require("dotenv").config();
 const poker = require("./modules/poker");
-const cookieParser = require("./modules/cookieParser");
 const database = require("./modules/database");
 const expressCookieParser = require("cookie-parser");
 const app = express();
 const server = require("http").createServer(app);
 const wss = require("socket.io")(server);
+const rooms = require("./modules/rooms");
+const serverUtils = require("./modules/serverUtils");
+const expressMiddleware = require("./modules/expressMiddleware");
 // Named Constants
 const accessTokenName = "access_token";
 
@@ -20,66 +20,15 @@ app.set("view engine", "ejs");
 app.use(express.json({ limit: "1kb" }));
 app.use(expressCookieParser());
 
-function createJWT(data) {
-  return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
-}
-
-// Returns JWT data AND verifies that the token was created by the server
-function getJWTData(JWT) {
-  let data;
-  try {
-    data = jwt.verify(JWT, process.env.ACCESS_TOKEN_SECRET);
-  } catch (err) {
-    data = null;
-  }
-  return data;
-}
-function isString(possibleString) {
-  return typeof possibleString == "string";
-}
-function getAccessToken(cookies) {
-  let accessToken;
-  try {
-    if (typeof cookies == "string") {
-      accessToken = cookieParser.parseStringCookiesKey(cookies, accessTokenName);
-    } else {
-      accessToken = cookieParser.parseJSONCookiesKey(cookies, accessTokenName);
-    }
-  } catch (err) {
-    console.error("Incorrect type passed to getAccessToken!");
-  }
-  return accessToken;
-}
-
-function getUserFromToken(token) {
-  let username = null;
-  const data = getJWTData(token);
-  if (data) {
-    try {
-      username = data.username;
-    } catch (err) {
-      // Do nothing
-    }
-  }
-  return username;
-}
-
-function checkIsLoggedIn(cookies) {
-  let isLoggedIn = false;
-  let JSONCookies = expressCookieParser.JSONCookies(cookies);
-  let token = cookieParser.parseJSONCookiesKey(JSONCookies, accessTokenName);
-  if (token) {
-    if (getJWTData(token)) isLoggedIn = true;
-  }
-  return isLoggedIn;
-}
+app.use("/poker/:roomID", expressMiddleware.verifyJoinRoom);
+app.use("/coinflip/:roomID", expressMiddleware.verifyJoinRoom);
 
 const port = 3000;
 let shuffledCards = poker.shuffledDeck();
 
 function menuBar(reqCookies, otherOptions) {
-  const isLoggedIn = checkIsLoggedIn(reqCookies);
-  const username = getUserFromToken(getAccessToken(reqCookies));
+  const isLoggedIn = serverUtils.checkIsLoggedIn(reqCookies);
+  const username = serverUtils.getUserFromToken(serverUtils.getAccessToken(reqCookies));
   let options = { username: username, isLoggedIn: isLoggedIn };
   if (typeof(otherOptions) == "object") {
     return {...options, ...otherOptions}
@@ -95,20 +44,11 @@ app.get("/", (req, res) => {
   res.render("root", menuBar(req.cookies));
 });
 
-async function checkIfUserExists(username) {
-  const conn = await database.fetchConn();
-  let userExists = false
-  if ((await conn.query("SELECT * FROM users WHERE username = ?", username)).length > 0) {
-    userExists = true;
-  }
-  return userExists;
-}
-
 app.get("/profile/:username", async (req, res) => {
-  const username = getUserFromToken(getAccessToken(req.cookies));
+  const username = serverUtils.getUserFromToken(serverUtils.getAccessToken(req.cookies));
   const profileOf = req.params['username'];
   console.log(`Serving profile page for username '${profileOf}'`);
-  if (await checkIfUserExists(profileOf)){
+  if (await serverUtils.checkIfUserExists(profileOf)){
     res.render("profile", menuBar(req.cookies, {profileOf: profileOf}))
   } else {
     console.log(`User '${username}' does not exist!`)
@@ -118,14 +58,14 @@ app.get("/profile/:username", async (req, res) => {
   }
 });
 
-app.get("/poker/:roomID", (req, res) => {
+app.get("/poker/:roomID", expressMiddleware.verifyJoinRoom, (req, res) => {
   console.log(`RoomID: ${req.params["roomID"]}`);
-  const isLoggedIn = checkIsLoggedIn(req.cookies);
+  const isLoggedIn = serverUtils.checkIsLoggedIn(req.cookies);
   res.render("poker", { isLoggedIn: isLoggedIn });
 });
 
 app.get("/poker", (req, res) => {
-  if (!checkIsLoggedIn(req.cookies)) {
+  if (!serverUtils.checkIsLoggedIn(req.cookies)) {
     return res.redirect("/login");
   }
   let randomString = (Math.random() + 1).toString(36).substring(2);
@@ -136,18 +76,22 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.get("/coinflip/:roomID", (req, res) => {
-  console.log(`RoomID: ${req.params["roomID"]}`);
-  const isLoggedIn = checkIsLoggedIn(req.cookies);
+app.get("/coinflip/:roomID", expressMiddleware.verifyJoinRoom, (req, res) => {
+  console.log(`RoomID: ${req.params.roomID}`);
+  const isLoggedIn = serverUtils.checkIsLoggedIn(req.cookies);
   res.render("coinflip", { isLoggedIn: isLoggedIn });
 });
 
 app.get("/coinflip", (req, res) => {
-  if (!checkIsLoggedIn(req.cookies)) {
-    return res.redirect("/coinflip");
+  if (!serverUtils.checkIsLoggedIn(req.cookies)) {
+    return res.redirect("/login");
   }
   let randomString = (Math.random() + 1).toString(36).substring(2);
   res.redirect(`/coinflip/${randomString}`);
+});
+
+app.get("/play", (req, res) => {
+  res.render("play", menuBar(req.cookies));
 });
 
 app.get("/login", (req, res) => {
@@ -162,10 +106,24 @@ app.get("/sign-up", (req, res) => {
 app.get("*", function (req, res) {
   res
     .status(404)
-    .render("404",menuBar(req.cookies));
+    .render("404", menuBar(req.cookies));
 });
 
 // Handle Post Requests
+app.post("/create-room", (req, res) => {
+  const roomName = req.body.roomName;
+  const conditionalArray = [typeof roomName == "string", roomName.length >= 6, roomName.length <= 50, /^[a-zA-Z0-9_]*$/.test(roomName)];
+  if (!conditionalArray.includes(false)){
+    const requestingUser = serverUtils.getUserFromToken(serverUtils.getAccessToken(req.cookies));
+    const roomType = 1;
+    const isPublic = true;
+    const maxPlayers = 8;
+    console.log(`Received post from ${requestingUser}, to create a room with name ${roomName}, type ${roomType}, public status of ${isPublic}, and max players of ${maxPlayers} `);
+    rooms.createRoom(roomName, roomType, isPublic, maxPlayers);
+    rooms.addPlayerToRoom(requestingUser, roomName);
+  }
+});
+
 async function loginUser (username, password) {
   // Get DB connection
   const conn = await database.fetchConn();
@@ -179,7 +137,7 @@ async function loginUser (username, password) {
       let isPasswordCorrect = await bcrypt.compare(password, hashedPassword[0]["password_hash"]);
       if (isPasswordCorrect) {
         console.log(`Logging in ${username}...`);
-        const accessToken = createJWT({ username: username });
+        const accessToken = serverUtils.createJWT({ username: username });
         userObject.loginSuccess = isPasswordCorrect;
         userObject.accessToken = accessToken;
       }
@@ -226,7 +184,7 @@ async function createNewUser(username, email, password) {
       const saltRounds = 10;
       let hashedPassword = await bcrypt.hash(password, saltRounds);
       await conn.query("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", [username, email, hashedPassword]);
-      const accessToken = createJWT({ username: username });
+      const accessToken = serverUtils.createJWT({ username: username });
       newUserObject.wasCreated = true;
       newUserObject.accessToken = accessToken;
     } else {
@@ -276,7 +234,7 @@ app.post("/logout", async (req, res) => {
 const connectedClients = new Map();
 
 wss.use((socket, next) => {
-  const JWTData = getJWTData(getAccessToken(socket.handshake.headers.cookie));
+  const JWTData = serverUtils.getJWTData(serverUtils.getAccessToken(socket.handshake.headers.cookie));
   if (!JWTData) {
     next(new Error("Token was null"));
   } else {
@@ -298,7 +256,7 @@ wss.on("connection", (ws) => {
       shuffledCards = poker.shuffledDeck();
       ws.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
     }
-    if (event === "joinGame" && arg1 && isString(arg1) && /^[a-zA-Z0-9]+$/.test(arg1)) {
+    if (event === "joinGame" && arg1 && serverUtils.isString(arg1) && /^[a-zA-Z0-9]+$/.test(arg1)) {
       // TODO: make a proper way to create and check if rooms exist
       ws.join(arg1);
     }

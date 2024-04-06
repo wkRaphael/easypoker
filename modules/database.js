@@ -18,13 +18,12 @@ const pool = mariadb.createPool({
 async function fetchConn() {
     if (isInitialization){
         conn = await pool.getConnection();
+        console.log("Database connected!");
+        console.log("Total connections: ", pool.totalConnections());
+        console.log("Active connections: ", pool.activeConnections());
+        console.log("Idle connections: ", pool.idleConnections());
         isInitialization = false;
     }
-    
-    console.log("Database connected!");
-    console.log("Total connections: ", pool.totalConnections());
-    console.log("Active connections: ", pool.activeConnections());
-    console.log("Idle connections: ", pool.idleConnections());
     return conn;
 }
 

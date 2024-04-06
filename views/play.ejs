@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<link rel="stylesheet" type="text/css" href="/css/play.css" />
+<html lang="en">
+  <head>
+    <title>Easy Poker</title>
+  </head>
+  <body>
+  <%- include("menubar.ejs") %>
+    <div class="MainContentWrapper">
+        <div class="ColumnWrapper">
+            <div class="WelcomeMessagesWrapper">
+                <h1 class="WelcomeMessage">Easy Poker Play Page</h1>
+                <p class="Text">Basic page to test creating rooms for games</p>
+                <p class="LineSeperator"><button class="Button" onclick="location.href = '/poker'">Play</button></p>
+            </div>
+            <div class="TestingWrapper">
+                <button class="Button" id="CreateRoomButton">Create Room</button>
+                <input class="Input" id="CreateRoomInput">
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/scripts/play.js"></script>
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.11/purify.min.js"
+    integrity="sha512-ce0fmuEgWrpnIXWKQrSgJ5FsBsr/hnOsxdWvk5lu1GThckasLwc+TAFERLNIwWnWqBoWV4GPDJiz2PSPntinVA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  </body>
+</html>
