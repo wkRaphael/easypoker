@@ -22,6 +22,7 @@ app.use(expressCookieParser());
 
 app.use("/poker/:roomID", expressMiddleware.verifyJoinRoom);
 app.use("/coinflip/:roomID", expressMiddleware.verifyJoinRoom);
+app.use("/add-player-to-room", expressMiddleware.verifyIsOwnerOfRoom);
 
 const port = 3000;
 let shuffledCards = poker.shuffledDeck();
@@ -110,17 +111,46 @@ app.get("*", function (req, res) {
 });
 
 // Handle Post Requests
-app.post("/create-room", (req, res) => {
-  const roomName = req.body.roomName;
-  const conditionalArray = [typeof roomName == "string", roomName.length >= 6, roomName.length <= 50, /^[a-zA-Z0-9_]*$/.test(roomName)];
+app.post("/add-player-to-room", expressMiddleware.verifyIsOwnerOfRoom, async (req, res) => {
+  const roomName = req.body.roomID;
+  const player = req.body.player;
+  const conditionalArray = [typeof roomName == "string", typeof player == "string", player.length <= 30, roomName.length >= 6, roomName.length <= 25, /^[a-zA-Z0-9_]*$/.test(roomName), /^[a-zA-Z0-9_]*$/.test(player)];
+  if (!conditionalArray.includes(false)){
+    const result = await rooms.addPlayerToRoom(player, roomName);
+    return res.sendStatus("200");
+  } else {
+    return res.sendStatus("400");
+  }
+})
+
+
+// UPDATE BEFORE PUT INTO PRODUCTION - Users should not be able to remove most rooms!
+app.post("/remove-room", expressMiddleware.verifyIsOwnerOfRoom, async (req, res) => {
+  const roomName = req.body.roomID;
+  console.log(`attempting to remove room with name ${roomName}`)
+  const conditionalArray = [typeof roomName == "string", roomName.length >= 6, roomName.length <= 25, /^[a-zA-Z0-9_]*$/.test(roomName)];
+  if (!conditionalArray.includes(false)){
+    const result = await rooms.removeRoom(roomName);
+    return res.sendStatus("200");
+  } else {
+    return res.sendStatus("400");
+  }
+})
+
+app.post("/create-room", async (req, res) => {
+  const roomName = req.body.roomID;
+  console.log(`RoomName is = ${roomName}`)
+  const conditionalArray = [typeof roomName == "string", roomName.length >= 6, roomName.length <= 25, /^[a-zA-Z0-9_]*$/.test(roomName)];
   if (!conditionalArray.includes(false)){
     const requestingUser = serverUtils.getUserFromToken(serverUtils.getAccessToken(req.cookies));
     const roomType = 1;
     const isPublic = true;
     const maxPlayers = 8;
     console.log(`Received post from ${requestingUser}, to create a room with name ${roomName}, type ${roomType}, public status of ${isPublic}, and max players of ${maxPlayers} `);
-    rooms.createRoom(roomName, roomType, isPublic, maxPlayers);
-    rooms.addPlayerToRoom(requestingUser, roomName);
+    await rooms.createRoom(roomName, roomType, isPublic, maxPlayers);
+    await rooms.addPlayerToRoom(requestingUser, roomName);
+  } else {
+    return res.sendStatus("400")
   }
 });
 
