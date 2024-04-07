@@ -28,9 +28,31 @@
               <label class="Text">Player: </label>
               <input class="Input" id="AddPlayerPlayerInput">
             </div>
+            <div class="TestingWrapper" id="RoomsWrapper">
+              <button class="Button" id="GetRoomsButton">Refresh Rooms</button>
+            </div>
+            <div class="RoomsContainer" id="RoomsContainer">
+              <div class="RoomsHeaderWrapper">
+                <div class="Room" style="border: none;">
+                  <div class="RoomNameWrapper">
+                    <div style="font-size: 20px;color: var(--color-3);">Room Name</div>
+                  </div>
+                  <div class="RoomTypeWrapper">
+                    <div style="font-size: 20px;color: var(--color-3);">Room Type</div>
+                  </div>
+                  <div class="RoomMaxPlayersWrapper">
+                    <div style="font-size: 20px;color: var(--color-3);">Max Players</div>
+                  </div>
+                  <div class="RoomPublicStatusWrapper">
+                    <div style="font-size: 20px;color: var(--color-3);">Public Room?</div>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
     </div>
     <script type="module" src="/scripts/play.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script
     src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.11/purify.min.js"
     integrity="sha512-ce0fmuEgWrpnIXWKQrSgJ5FsBsr/hnOsxdWvk5lu1GThckasLwc+TAFERLNIwWnWqBoWV4GPDJiz2PSPntinVA=="

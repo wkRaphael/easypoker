@@ -59,36 +59,14 @@ app.get("/profile/:username", async (req, res) => {
   }
 });
 
-app.get("/poker/:roomID", expressMiddleware.verifyJoinRoom, (req, res) => {
-  console.log(`RoomID: ${req.params["roomID"]}`);
-  const isLoggedIn = serverUtils.checkIsLoggedIn(req.cookies);
-  res.render("poker", { isLoggedIn: isLoggedIn });
-});
-
-app.get("/poker", (req, res) => {
-  if (!serverUtils.checkIsLoggedIn(req.cookies)) {
-    return res.redirect("/login");
-  }
-  let randomString = (Math.random() + 1).toString(36).substring(2);
-  res.redirect(`/poker/${randomString}`);
-});
-
 app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.get("/coinflip/:roomID", expressMiddleware.verifyJoinRoom, (req, res) => {
+app.get("/play/:roomID", expressMiddleware.verifyJoinRoom, (req, res) => {
   console.log(`RoomID: ${req.params.roomID}`);
   const isLoggedIn = serverUtils.checkIsLoggedIn(req.cookies);
   res.render("coinflip", { isLoggedIn: isLoggedIn });
-});
-
-app.get("/coinflip", (req, res) => {
-  if (!serverUtils.checkIsLoggedIn(req.cookies)) {
-    return res.redirect("/login");
-  }
-  let randomString = (Math.random() + 1).toString(36).substring(2);
-  res.redirect(`/coinflip/${randomString}`);
 });
 
 app.get("/play", (req, res) => {
@@ -268,40 +246,53 @@ wss.use((socket, next) => {
   if (!JWTData) {
     next(new Error("Token was null"));
   } else {
-    socket.username = JWTData.username;
+    socket.userId = JWTData.username;
     next();
   }
 });
 
-wss.on("connection", (ws) => {
-  const userId = ws.username;
+wss.on("connection", (socket) => {
+  const userId = socket.userId;
 
-  connectedClients.set(ws, userId);
+  connectedClients.set(socket, userId);
   console.log(`WebSocket connected - User ID: ${userId}`);
 
-  ws.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
+  socket.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
 
-  ws.on("message", (event, arg1) => {
+  socket.on("message", (event, arg1) => {
     if (event === "shuffle") {
       shuffledCards = poker.shuffledDeck();
-      ws.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
+      socket.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
     }
     if (event === "joinGame" && arg1 && serverUtils.isString(arg1) && /^[a-zA-Z0-9]+$/.test(arg1)) {
       // TODO: make a proper way to create and check if rooms exist
-      ws.join(arg1);
+      socket.join(arg1);
     }
     if (event === "start") {
       wss.to(arg1).emit("getResult", "Hello World!");
     }
-    console.log(`Message: ${event} User ID: ${connectedClients.get(ws)}`);
+    console.log(`Message: ${event} User ID: ${connectedClients.get(socket)}`);
   });
 
-  ws.on("close", () => {
-    console.log(`WebSocket disconnected - User ID: ${connectedClients.get(ws)}`);
-    connectedClients.delete(ws);
+  /*
+  Filter should be in JSON format. Options that aren't used should be null
+  Filter options:
+  Filter by isPublic
+  Filter by max_players
+  Filter by room_name
+  Filter by room_type
+  */
+  socket.on("get-rooms", async (filters) => {
+    console.log(`Websocket with id ${socket.id} is requesting rooms!`)
+    socket.emit("rooms", await rooms.getRoomsWithFilters(filters));
+  });
+
+  socket.on("close", () => {
+    console.log(`WebSocket disconnected - User ID: ${connectedClients.get(socket)}`);
+    connectedClients.delete(socket);
   });
 });
 
 server.listen(port, function () {
-  console.log(`EasyPoker server listening on port http://127.0.0.1:${port}!`);
+  console.log(`EasyPoker server listening on port http://localhost:${port}!`);
 });

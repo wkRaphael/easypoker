@@ -38,6 +38,60 @@ ol {
   flex-direction: row;
   margin: 10px;
 }
+.RoomsContainer{
+  display: flex;
+  border-style: solid;
+  border-color: var(--color-1);
+  border-width: 5px;
+  margin: 10px;
+  flex-direction: column;
+}
+.RoomsHeaderWrapper{
+  display: flex;
+  flex-direction: row;
+}
+.RoomsWrapper{
+  display: flex;
+  flex-direction: column;
+}
+.Room{
+  display: flex;
+  border-style: solid;
+  border-color: var(--color-1);
+  color: var(--text-color);
+  border-top-width: 2px;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  flex-direction: row;
+}
+.RoomNameWrapper{
+  display: flex;
+  width: 200px;
+  padding: 15px;
+  justify-content: center;
+}
+.RoomTypeWrapper{
+  display: flex;
+  width: 35px;
+  margin-left: 25px;
+  padding: 15px;
+  justify-content: center;
+}
+.RoomMaxPlayersWrapper{
+  display: flex;
+  width: 35px;
+  margin-left: 25px;
+  padding: 15px;
+  justify-content: center;
+}
+.RoomPublicStatusWrapper{
+  display: flex;
+  width: 75px;
+  margin-left: 25px;
+  padding: 15px;
+  justify-content: center;
+}
 .Text{
   margin-top: 10px;
   margin-bottom: 0;

@@ -2,8 +2,39 @@ const database = require("./database");
 
 // Room Functions
 async function getRooms() {
-    const conn = await database.fetchConn();
-    return await conn.query("SELECT * FROM rooms");
+    try{
+        const conn = await database.fetchConn();
+        return await conn.query("SELECT * FROM rooms");
+    } catch(err) {
+        console.error(err);
+    }
+}
+
+/*
+Filter should be in JSON format. Options that aren't used should be null
+Filter options:
+Filter by isPublic
+Filter by max_players
+Filter by room_name
+Filter by room_type
+*/
+async function getRoomsWithFilters(filters) {
+    let result = null;
+    try{
+        const filterIsPublic = (filters.isPublic);
+        const filterMaxPlayers = (filters.maxPlayers);
+        const filterRoomName = (filters.roomName);
+        const filterRoomType = (filters.roomType);
+        
+        const conn = await database.fetchConn();
+        console.log(`Filters filterIsPublic = ${filterIsPublic}, filterMaxPlayers = ${filterMaxPlayers}, filterRoomName = ${filterRoomName}, filterRoomType = ${filterRoomType}`);
+        result = await conn.query("SELECT * FROM rooms WHERE (room_ispublic = ? OR ? IS NULL) AND (room_maxplayers = ? OR ? IS NULL) AND (room_name = ? OR ? IS NULL) AND (room_type = ? OR ? IS NULL) ORDER BY room_type DESC",
+         [filterIsPublic, filterIsPublic, filterMaxPlayers, filterMaxPlayers, filterRoomName, filterRoomName, filterRoomType, filterRoomType]);
+    } catch(err) {
+        console.error(err);
+    } finally {
+        return result;
+    }
 }
 
 async function isPlayerOwnerOfRoom(player, roomName) {
@@ -145,6 +176,7 @@ module.exports = {
     createRoom,
     removeRoom,
     getRooms,
+    getRoomsWithFilters,
     addPlayerToRoom,
     removePlayerFromRoom,
     getPlayersInRoom,
