@@ -32,9 +32,8 @@ async function getRoomsWithFilters(filters) {
          [filterIsPublic, filterIsPublic, filterMaxPlayers, filterMaxPlayers, filterRoomName, filterRoomName, filterRoomType, filterRoomType]);
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
 }
 
 async function isPlayerOwnerOfRoom(player, roomName) {
@@ -42,15 +41,14 @@ async function isPlayerOwnerOfRoom(player, roomName) {
     try{
         const players = await getPlayersInRoom(roomName);
         if (players) {
-            if (players[0] == player) {
+            if (players[0] === player) {
                 result = true;
             }
         }
     } catch(err) {
         console.error(err)
-    } finally {
-        return result;
     }
+    return result;
 }
 
 async function isPlayerInRoom(player, roomName) {
@@ -64,9 +62,9 @@ async function isPlayerInRoom(player, roomName) {
         }
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
+
 }
 
 async function getPlayersInRoom(roomName) {
@@ -78,13 +76,13 @@ async function getPlayersInRoom(roomName) {
         
         if (roomExists) {
             let playerJSON = await conn.query("SELECT room_players FROM rooms WHERE room_name = ?", roomName);
-            result = playerJSON[0].room_players.playerArray;
+            result = playerJSON[0]["room_players"].playerArray;
         }
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
+
 }
 
 async function removePlayerFromRoom(player, roomName) {
@@ -96,7 +94,7 @@ async function removePlayerFromRoom(player, roomName) {
         const roomExists =  ((playerJSON).length > 0);
         const playerExists =  ((await conn.query("SELECT user_id FROM users WHERE username = ?", player)).length > 0);
 
-        let playerArray = playerJSON[0].room_players.playerArray;
+        let playerArray = playerJSON[0]["room_players"].playerArray;
 
         if (roomExists && playerExists && playerArray.includes(player)) {
             let playerIndex = playerArray.indexOf(player);
@@ -105,9 +103,9 @@ async function removePlayerFromRoom(player, roomName) {
         }
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
+
 }
 
 async function addPlayerToRoom(player, roomName) {
@@ -129,6 +127,7 @@ async function addPlayerToRoom(player, roomName) {
             }
             if (playerArray.length + 1 > roomData[0]["room_maxplayers"]) return "max player already in room";
             playerArray.push(player);
+            roomName = 0;
             result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
         } else {
             playerArray = [];
@@ -137,9 +136,9 @@ async function addPlayerToRoom(player, roomName) {
         }
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
+
 }
 
 async function removeRoom(roomName) {
@@ -152,9 +151,9 @@ async function removeRoom(roomName) {
         }
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
+
 }
 
 async function createRoom(roomName, type, isPublic, maxPlayers) {
@@ -167,9 +166,8 @@ async function createRoom(roomName, type, isPublic, maxPlayers) {
         }
     } catch(err) {
         console.error(err);
-    } finally {
-        return result;
     }
+    return result;
 }
 
 module.exports = {

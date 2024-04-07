@@ -12,6 +12,8 @@ const wss = require("socket.io")(server);
 const rooms = require("./modules/rooms");
 const serverUtils = require("./modules/serverUtils");
 const expressMiddleware = require("./modules/expressMiddleware");
+const {getUserFromToken, getAccessToken} = require("./modules/serverUtils");
+const {response} = require("express");
 // Named Constants
 const accessTokenName = "access_token";
 
@@ -95,9 +97,12 @@ app.post("/add-player-to-room", expressMiddleware.verifyIsOwnerOfRoom, async (re
   const conditionalArray = [typeof roomName == "string", typeof player == "string", player.length <= 30, roomName.length >= 6, roomName.length <= 25, /^[a-zA-Z0-9_]*$/.test(roomName), /^[a-zA-Z0-9_]*$/.test(player)];
   if (!conditionalArray.includes(false)){
     const result = await rooms.addPlayerToRoom(player, roomName);
-    return res.sendStatus("200");
+    if (result) {
+      return res.sendStatus(200);
+    }
+    return res.sendStatus(400);
   } else {
-    return res.sendStatus("400");
+    return res.sendStatus(400);
   }
 })
 
@@ -109,9 +114,12 @@ app.post("/remove-room", expressMiddleware.verifyIsOwnerOfRoom, async (req, res)
   const conditionalArray = [typeof roomName == "string", roomName.length >= 6, roomName.length <= 25, /^[a-zA-Z0-9_]*$/.test(roomName)];
   if (!conditionalArray.includes(false)){
     const result = await rooms.removeRoom(roomName);
-    return res.sendStatus("200");
+    if (result) {
+      return res.sendStatus(200);
+    }
+    return res.sendStatus(400);
   } else {
-    return res.sendStatus("400");
+    return res.sendStatus(400);
   }
 })
 
@@ -250,26 +258,41 @@ wss.use((socket, next) => {
     next();
   }
 });
-
-wss.on("connection", (socket) => {
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+wss.on("connection", async (socket) => {
   const userId = socket.userId;
-
+const roomID = socket.handshake.query.roomID;
   connectedClients.set(socket, userId);
-  console.log(`WebSocket connected - User ID: ${userId}`);
-
-  socket.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
-
+  if (roomID !== undefined) {
+    let room = await rooms.getRoomsWithFilters({roomName: roomID})
+    if (room.length > 0) {
+      socket.join(roomID)
+      wss.to(roomID).emit("update-players", room[0]["room_players"])
+    }
+  }
+  socket.on("start", async () => {
+    if (roomID !== undefined) {
+      let room = await rooms.getRoomsWithFilters({roomName: roomID})
+      if (room.length > 0) {
+        socket.join(roomID)
+        wss.to(roomID).emit("get-result", room[0]["room_players"].playerArray[getRandomInt(room[0]["room_players"].playerArray.length)])
+      }
+    }
+  })
+  if (socket.handshake.query.roomID !== undefined && await rooms.isPlayerInRoom(userId, socket.handshake.query.roomID)) {
+    socket.join(socket.handshake.query.roomID)
+  }
+  socket.emit("updateHand", JSON.stringify({card1: shuffledCards[0], card2: shuffledCards[1]}));
   socket.on("message", (event, arg1) => {
     if (event === "shuffle") {
       shuffledCards = poker.shuffledDeck();
-      socket.emit("updateHand", JSON.stringify({ card1: shuffledCards[0], card2: shuffledCards[1] }));
+      socket.emit("updateHand", JSON.stringify({card1: shuffledCards[0], card2: shuffledCards[1]}));
     }
     if (event === "joinGame" && arg1 && serverUtils.isString(arg1) && /^[a-zA-Z0-9]+$/.test(arg1)) {
       // TODO: make a proper way to create and check if rooms exist
       socket.join(arg1);
-    }
-    if (event === "start") {
-      wss.to(arg1).emit("getResult", "Hello World!");
     }
     console.log(`Message: ${event} User ID: ${connectedClients.get(socket)}`);
   });
@@ -282,6 +305,9 @@ wss.on("connection", (socket) => {
   Filter by room_name
   Filter by room_type
   */
+  socket.on("get-players", (event) => {
+    console.log("event");
+  })
   socket.on("get-rooms", async (filters) => {
     console.log(`Websocket with id ${socket.id} is requesting rooms!`)
     socket.emit("rooms", await rooms.getRoomsWithFilters(filters));

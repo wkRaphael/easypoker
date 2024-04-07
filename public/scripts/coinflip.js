@@ -1,30 +1,35 @@
-const ws = io();
+const ws = io({
+  query: {
+    roomID: window.location.pathname.split("/").pop()
+  }
+});
 
-const card1Element = document.getElementById("card1");
-const card2Element = document.getElementById("card2");
+const players = document.getElementById("players");
+const coinflipResult = document.getElementById("cf-result");
 
-ws.onOpen = () => {
-  console.log("WebSocket connected");
-};
+ws.on("connection", () => {
+  console.log("WebSocket disconnected");
+})
 
-ws.on("getResult", (result) => {
-  console.log(result);
+ws.on("update-players", (data) => {
+  console.log(data);
+  data.playerArray.forEach(player => {
+    let playerElement = document.createElement("div")
+    playerElement.className = "playerElement"
+    playerElement.innerText = player
+    players.appendChild(playerElement);
+  })
+})
+ws.on("get-result", (result) => {
+  coinflipResult.innerText = result;
 });
 
 ws.onclose = () => {
   console.log("WebSocket disconnected");
 };
 
-function setCardColor(element, cardValue) {
-  if (cardValue.includes("♥") || cardValue.includes("♦")) {
-    element.style.color = "red";
-  } else {
-    element.style.color = "black";
-  }
-}
-
 function start() {
-  ws.send("start", window.location.pathname.split("/").pop());
+  ws.emit("start", window.location.pathname.split("/").pop());
 }
 //FIXME: find a better way to do these both
 function joinGame() {
