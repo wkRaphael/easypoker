@@ -12,7 +12,7 @@ ws.on("connection", () => {
 })
 
 ws.on("update-players", (data) => {
-  console.log(data);
+  document.querySelectorAll('.playerElement').forEach(e => e.remove());
   data.playerArray.forEach(player => {
     let playerElement = document.createElement("div")
     playerElement.className = "playerElement"
