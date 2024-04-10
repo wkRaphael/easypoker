@@ -41,7 +41,7 @@ async function isPlayerOwnerOfRoom(player, roomName) {
     try{
         const players = await getPlayersInRoom(roomName);
         if (players) {
-            if (players[0] === player) {
+            if (players.find(playr => playr.toUpperCase() === player.toUpperCase()) !== undefined && players[0] === players.find(playr => playr.toUpperCase() === player.toUpperCase())) {
                 result = true;
             }
         }
@@ -56,7 +56,7 @@ async function isPlayerInRoom(player, roomName) {
     try{
         const players = await getPlayersInRoom(roomName);
         if (players) {
-            if (players.includes(player)) {
+            if (players.find(playr => playr.toUpperCase() === player.toUpperCase()) !== undefined) {
                 result = true;
             }
         }
@@ -96,7 +96,7 @@ async function removePlayerFromRoom(player, roomName) {
 
         let playerArray = playerJSON[0]["room_players"].playerArray;
 
-        if (roomExists && playerExists && playerArray.includes(player)) {
+        if (roomExists && playerExists && playerArray.includes(playerArray.find(playr => playr.toUpperCase() === player.toUpperCase()))) {
             let playerIndex = playerArray.indexOf(player);
             playerArray.splice(playerIndex, 1);
             result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
@@ -115,14 +115,15 @@ async function addPlayerToRoom(player, roomName) {
 
         let roomData = await conn.query("SELECT * FROM rooms WHERE room_name = ?", roomName);
         const roomExists =  ((roomData).length > 0);
-        const playerExists =  ((await conn.query("SELECT user_id FROM users WHERE username = ?", player)).length > 0);
+        const usersDB = await conn.query("SELECT user_id, username FROM users WHERE username = ?", player)
+        const playerExists =  ((usersDB).length > 0);
         if (!roomExists) return "room does not exist";
         if (!playerExists) return "player does not exist";
-
+        player = usersDB[0]["username"]
         let playerArray;
         if(roomData[0]["room_players"]) {
             playerArray = roomData[0]["room_players"].playerArray;
-            if (playerArray.includes(player)) {
+            if (playerArray.find(playr => playr.toUpperCase() === player.toUpperCase())) {
                 return "player already in room";
             }
             if (playerArray.length + 1 > roomData[0]["room_maxplayers"]) return "max player already in room";
