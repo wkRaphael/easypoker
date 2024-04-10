@@ -127,7 +127,6 @@ async function addPlayerToRoom(player, roomName) {
             }
             if (playerArray.length + 1 > roomData[0]["room_maxplayers"]) return "max player already in room";
             playerArray.push(player);
-            roomName = 0;
             result = await conn.query("UPDATE rooms SET room_players = ? WHERE room_name = ?", [JSON.stringify({ playerArray: playerArray }), roomName]);
         } else {
             playerArray = [];
