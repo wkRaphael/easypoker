@@ -12,8 +12,6 @@ const wss = require("socket.io")(server);
 const rooms = require("./modules/rooms");
 const serverUtils = require("./modules/serverUtils");
 const expressMiddleware = require("./modules/expressMiddleware");
-const {getUserFromToken, getAccessToken} = require("./modules/serverUtils");
-const {response} = require("express");
 // Named Constants
 const accessTokenName = "access_token";
 
@@ -43,7 +41,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Handle Get Requests
 app.get("/", (req, res) => {
-
   res.render("root", menuBar(req.cookies));
 });
 
@@ -62,7 +59,7 @@ app.get("/profile/:username", async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  res.render("login", menuBar(req.cookies));
 });
 
 app.get("/play/:roomID", expressMiddleware.verifyJoinRoom, (req, res) => {
@@ -76,11 +73,11 @@ app.get("/play", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  res.render("login", menuBar(req.cookies));
 });
 
 app.get("/sign-up", (req, res) => {
-  res.render("sign-up");
+  res.render("sign-up", menuBar(req.cookies));
 });
 
 //This needs to stay the last get request

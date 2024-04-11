@@ -2,6 +2,7 @@ require("dotenv").config();
 const expressCookieParser = require("cookie-parser");
 const cookieParser = require("./cookieParser");
 const jwt = require("jsonwebtoken");
+const database = require("./database")
 
 const accessTokenName = "access_token";
 

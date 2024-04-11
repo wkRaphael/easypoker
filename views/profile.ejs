@@ -5,34 +5,7 @@
     <title>Easy Poker</title>
   </head>
   <body>
-    <header>
-      <div class="MenuBar" id="MenuBar">
-        <div class="MenuBarContentContainer" id="MenuBarContentContainer">
-          <div class="MenuBarTitleWrapper">
-            <a class="Title" id="Title" href="/">Easy Poker</a>
-          </div>
-          <div class="MenuBarLinkButtonsWrapper">
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-            <a class="MenuBarLinkButtons" href="/">Temp</a>
-          </div>
-          <div class="MenuBarLoginWrapper">
-            <% if (isLoggedIn === false) { %>
-            <a class="MenuBarLinkButtons" href="/login">Login</a>
-            <a class="MenuBarLinkButtons" href="/sign-up">Sign Up</a>
-            <% } else { %>
-            <div class="MenuBarLoggedInText">Logged in as:</div>
-            <div class="MenuBarAccountWrapper" id="AccountButtonInactive"><a class="MenuBarAccountButton"><%= username %></a></div>
-            <ul class="hidden" id="AccountMenu">
-              <div class="AccountMenuButtonWrapper" id="ProfileButtonWrapper"><li class="AccountMenuButtons" id="ProfileButton" href="/profile/<%= username %>">Profile</li></div>
-              <div class="AccountMenuButtonWrapper" id="LogoutButtonWrapper"><li class="AccountMenuButtons" id="LogoutButton">Logout</li></div>
-            </ul>
-            <% } %>
-          </div>
-        </div>
-      </div>
-    </header>
+    <%- include("menubar.ejs") %>
     <div class="MainContentWrapper">
         <h1 class="Text"><span style="color: #c0eb6a;"><%= profileOf %>'s </span>Profile</h1>
     </div>
