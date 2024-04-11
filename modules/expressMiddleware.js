@@ -35,7 +35,21 @@ async function verifyJoinRoom(req, res, next) {
     }
 }
 
+async function verifyIsLoggedIn(req, res, next) {
+    try{
+        const isLoggedIn = serverUtils.checkIsLoggedIn(req.cookies);
+        if (isLoggedIn){
+            return next()
+        } else {
+            return res.sendStatus(401);
+        }
+    } catch(err) {
+        console.error(err);
+    }
+}
+
 module.exports = {
     verifyJoinRoom,
-    verifyIsOwnerOfRoom
+    verifyIsOwnerOfRoom,
+    verifyIsLoggedIn
 }

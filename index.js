@@ -123,7 +123,7 @@ app.post("/remove-room", expressMiddleware.verifyIsOwnerOfRoom, async (req, res)
   }
 })
 
-app.post("/create-room", async (req, res) => {
+app.post("/create-room", expressMiddleware.verifyIsLoggedIn, async (req, res) => {
   const roomName = req.body.roomID;
   console.log(`RoomName is = ${roomName}`)
   const conditionalArray = [typeof roomName == "string", roomName.length >= 6, roomName.length <= 25, /^[a-zA-Z0-9_]*$/.test(roomName)];
