@@ -26,7 +26,6 @@ const createAccount = () => {
             } else {
                 if (response.wasCreated) {
                 newAlert(`Account Created!`, '#00FF02', 1);
-                    localStorage.setItem("username", credentials.username);
                     sendToApp();
                 } else {
                     newAlert(`<span style="color: #FF6767;"><strong>${response.error}</strong></span>`, '#FF8A00', 4);
