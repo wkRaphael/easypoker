@@ -3,7 +3,7 @@ import sendPOST from './modules/network.js';
 document.addEventListener('DOMContentLoaded', function () {
     const logoutButton = document.getElementById('LogoutButton');
     logoutButton.addEventListener('click', function() {
-        sendPOST('/logout', {}, () => {window.location.href = "/";});
+        sendPOST('/logout', {}, () => {window.location.href = "/"});
     });
 });
 
@@ -29,6 +29,7 @@ clickableDiv.addEventListener('click', function() {
 
 // Close the menu when clicking outside of it
 document.addEventListener('click', function(event) {
-  if (!clickableDiv.contains(event.target) && !menu.contains(event.target)) {
-    menu.classList.add('hidden');
-}});
+    if (!clickableDiv.contains(event.target) && !menu.contains(event.target)) {
+        menu.classList.add('hidden');
+    }
+});

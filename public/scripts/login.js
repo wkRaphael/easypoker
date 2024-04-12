@@ -35,6 +35,6 @@ const login = () => {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-  const loginButton = document.querySelector("#login");
-  loginButton.addEventListener("click", login);
+    const loginButton = document.querySelector("#login");
+    loginButton.addEventListener("click", login);
 });
